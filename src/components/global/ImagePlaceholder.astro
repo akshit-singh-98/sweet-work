@@ -1,0 +1,65 @@
+---
+// Reusable stand-in for any image slot that doesn't have a real asset yet —
+// a token-colored box with a centered image icon, inline SVG so it stays
+// crisp at any size. Drop this in wherever a section needs an image during
+// build-out; swap it for the real <img>/<Image>/CMS asset once it exists.
+// Unlike src/assets/*, this isn't a Figma export — it's a build-time utility,
+// so an agent creating/reusing it doesn't conflict with CLAUDE.md's "assets
+// are exported manually" rule.
+//
+// Straight-swap pattern: put the image's real Figma size, aspect ratio,
+// and radius on a wrapper in the section, then drop this inside it with
+// only `alt` set — it fills the wrapper and inherits its radius. The real image
+// later replaces it as <img class="image-fill" ...> inside the same
+// wrapper, so the layout doesn't move. `ratio` is only for standalone use
+// when there's no wrapper.
+//
+// `alt` is required: decide it now (see CLAUDE.md's "Alt text") and carry
+// the same value over to the real image on swap. alt="" marks the image as
+// decorative, so the placeholder is hidden from screen readers too.
+interface Props {
+  ratio?: string; // Standalone only: CSS aspect-ratio, e.g. '16 / 9'. Omit to fill the wrapper.
+  class?: string;
+  alt: string; // Same alt the real image will get. '' = decorative.
+}
+const { ratio, class: className = '', alt } = Astro.props;
+const decorative = alt === '';
+---
+<div
+  class:list={['image-placeholder', ratio ? 'is-standalone' : '', className]}
+  style={ratio ? `aspect-ratio: ${ratio}` : undefined}
+  role={decorative ? undefined : 'img'}
+  aria-label={decorative ? undefined : alt}
+  aria-hidden={decorative ? 'true' : undefined}
+>
+  <svg class="image-placeholder_icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+  </svg>
+</div>
+
+<style>
+  @layer components {
+    .image-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--color-bg-tertiary);
+      color: var(--color-secondary);
+    }
+
+    .image-placeholder.is-standalone {
+      height: auto;
+    }
+
+    .image-placeholder_icon {
+      width: 20%;
+      min-width: var(--image-placeholder-icon-min);
+      max-width: var(--image-placeholder-icon-max);
+      height: auto;
+    }
+  }
+</style>

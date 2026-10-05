@@ -1,0 +1,28 @@
+---
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/layout.css';
+import '../styles/utilities.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = '' } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Cascade layer order, locked in before any stylesheet loads. Must
+         match base.css — see the comment at the top of that file. -->
+    <style is:inline>@layer reset, base, layout, components, utilities;</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+    <slot />
+  </body>
+</html>

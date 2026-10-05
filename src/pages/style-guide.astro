@@ -1,0 +1,415 @@
+---
+// Living style guide — renders the real tokens (build-order step 2) and,
+// later, components (step 3) as they get built. Ships with styles only. Not part of the site's public nav; it's the visual reference and
+// QA surface described in CLAUDE.md. Update the arrays below every time a
+// token or component is added or renamed — this page is only useful if it
+// stays current.
+//
+// Layout modeled on assemblyai.com/brand-design-system: dark title bar,
+// sticky sidebar nav grouped by category, each section led by an eyebrow
+// label + heading + description, values shown in bordered "panel" cards.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/style-guide.css';
+
+const nav = [
+  {
+    group: 'Foundations',
+    links: [
+      { href: '#colors', label: 'Color palette' },
+      { href: '#typography', label: 'Typography' },
+      { href: '#spacing', label: 'Spacing' },
+      { href: '#radius', label: 'Radius' },
+      { href: '#containers', label: 'Containers' },
+    ],
+  },
+  // Build-order step 2 adds a Foundations link for every extra category
+  // the design's style guide defines (icons, borders, shadows, ...).
+  // Step 3 adds a 'Components' group here, one link per component.
+];
+
+const paletteColors = [
+  { name: '--color-primary', label: 'Primary', usage: 'Ink-level UI, primary buttons' },
+  { name: '--color-secondary', label: 'Secondary', usage: 'Muted text, secondary UI' },
+  { name: '--color-accent', label: 'Accent', usage: 'Links, CTAs, focus states' },
+  { name: '--color-alternate', label: 'Alternate', usage: 'Secondary accent, alternate CTAs' },
+  { name: '--color-ink', label: 'Ink (text)', usage: 'Default body text color' },
+  { name: '--color-bg', label: 'Background', usage: 'Default page background' },
+  { name: '--color-bg-secondary', label: 'Background — secondary', usage: 'Secondary section background' },
+  { name: '--color-bg-tertiary', label: 'Background — tertiary', usage: 'Tertiary section background' },
+  { name: '--color-bg-alternate', label: 'Background — alternate', usage: 'Alternate section background' },
+  { name: '--color-bg-alt', label: 'Background (alt)', usage: 'Alternating sections (existing)' },
+  { name: '--color-white', label: 'White', usage: 'Text/surfaces on dark backgrounds' },
+  { name: '--color-black', label: 'Black', usage: 'Raw black, rarely used directly' },
+];
+
+const textColorUtilities = [
+  { class: 'text-color-primary', label: 'text-color-primary', token: '--color-ink' },
+  { class: 'text-color-secondary', label: 'text-color-secondary', token: '--color-secondary' },
+  { class: 'text-color-alternate', label: 'text-color-alternate', token: '--color-alternate' },
+  { class: 'text-color-accent', label: 'text-color-accent', token: '--color-accent' },
+];
+
+const backgroundColorUtilities = [
+  { class: 'background-color-primary', label: 'background-color-primary', token: '--color-bg' },
+  { class: 'background-color-secondary', label: 'background-color-secondary', token: '--color-bg-secondary' },
+  { class: 'background-color-tertiary', label: 'background-color-tertiary', token: '--color-bg-tertiary' },
+  { class: 'background-color-alternate', label: 'background-color-alternate', token: '--color-bg-alternate' },
+  { class: 'background-color-alt', label: 'background-color-alt', token: '--color-bg-alt' },
+];
+
+const headingScale = [
+  { class: 'heading-style-h1', label: 'H1', token: '--text-h1-size' },
+  { class: 'heading-style-h2', label: 'H2', token: '--text-h2-size' },
+  { class: 'heading-style-h3', label: 'H3', token: '--text-h3-size' },
+  { class: 'heading-style-h4', label: 'H4', token: '--text-h4-size' },
+  { class: 'heading-style-h5', label: 'H5', token: '--text-h5-size' },
+  { class: 'heading-style-h6', label: 'H6', token: '--text-h6-size' },
+];
+
+const textSizeScale = [
+  { class: 'text-size-large', label: 'text-size-large', token: '--text-large-size' },
+  { class: 'text-size-medium', label: 'text-size-medium', token: '--text-medium-size' },
+  { class: 'text-size-regular', label: 'text-size-regular', token: '--text-regular-size' },
+  { class: 'text-size-small', label: 'text-size-small', token: '--text-small-size' },
+  { class: 'text-size-tiny', label: 'text-size-tiny', token: '--text-tiny-size' },
+];
+
+const textStyles = [
+  { class: 'text-style-allcaps', label: 'text-style-allcaps' },
+  { class: 'text-style-italic', label: 'text-style-italic' },
+  { class: 'text-style-link', label: 'text-style-link' },
+  { class: 'text-style-balance', label: 'text-style-balance' },
+  { class: 'text-style-strikethrough', label: 'text-style-strikethrough' },
+];
+
+const textWeights = [
+  { class: 'text-weight-light', label: 'text-weight-light', token: '--font-weight-light' },
+  { class: 'text-weight-normal', label: 'text-weight-normal', token: '--font-weight-normal' },
+  { class: 'text-weight-medium', label: 'text-weight-medium', token: '--font-weight-medium' },
+  { class: 'text-weight-semibold', label: 'text-weight-semibold', token: '--font-weight-semibold' },
+  { class: 'text-weight-bold', label: 'text-weight-bold', token: '--font-weight-bold' },
+];
+
+// No hardcoded values here — --space-* and --section-space-* are responsive
+// (see tokens.css), so the resolved value is read live client-side instead
+// of going stale at a breakpoint the way a typed-in number would.
+const spaceScale = [
+  'xxsmall', 'xsmall', 'small', 'medium', 'large', 'xlarge', 'xxlarge', 'huge', 'xhuge',
+].map((step) => ({ name: `--space-${step}`, step }));
+
+const sectionSpacing = ['small', 'medium', 'large', 'xlarge'].map((step) => ({
+  name: `--section-space-${step}`,
+  step,
+}));
+
+const radii = [
+  { name: '--radius-sm', label: '0.25rem', note: 'Buttons, inputs' },
+  { name: '--radius-md', label: '0.5rem', note: 'Cards' },
+  { name: '--radius-lg', label: '1rem', note: 'Large cards' },
+  { name: '--radius-full', label: 'full', note: 'Avatars, tags, pills' },
+];
+
+const containers = [
+  { class: 'container-small', name: '--container-small', usage: 'Narrow content — blog posts, forms' },
+  { class: 'container-medium', name: '--container-medium', usage: 'Standard section width' },
+  { class: 'container-large', name: '--container-large', usage: 'Wide marketing sections, full layouts' },
+];
+
+---
+<BaseLayout title="Style Guide — Sweet Work">
+  <div class="sg sg-root">
+    <header class="sg-titlebar">
+      <a href="/" class="sg-titlebar__name">Sweet Work</a>
+      <span class="sg-titlebar__divider">|</span>
+      <nav class="sg-titlebar__nav" aria-label="Tool pages">
+        <a href="/style-guide" class="sg-titlebar__link" aria-current="page">Style guide</a>
+        <a href="/class-system" class="sg-titlebar__link">Class system</a>
+      </nav>
+    </header>
+
+    <!--
+      This page is static output, so there's no server-side way to tell an
+      embedded iframe request apart from the top-level page (no query
+      string reaches prerendered frontmatter). #sg-bpbar ships hidden by
+      default; the script below un-hides it only outside an iframe, and
+      only there wires up the toggle — so an embedded copy of this page
+      never shows a second, nested toggle.
+    -->
+    <div id="sg-bpbar" class="sg-bpbar" hidden>
+      <span class="sg-bpbar__label">Preview at</span>
+      <div class="sg-bptoggle" role="group" aria-label="Preview breakpoint">
+        <button type="button" class="sg-bpbtn" data-breakpoint="desktop" aria-pressed="true">Desktop</button>
+        <button type="button" class="sg-bpbtn" data-breakpoint="tablet" aria-pressed="false">Tablet</button>
+        <button type="button" class="sg-bpbtn" data-breakpoint="mobile" aria-pressed="false">Mobile</button>
+      </div>
+      <span class="sg-bpbar__hint">
+        Tablet/mobile render in a real iframe at that width, so every
+        responsive token override actually evaluates — not a simulation.
+      </span>
+    </div>
+
+    <div id="sg-live" class="sg-shell">
+      <nav class="sg-sidebar">
+        <p class="sg-eyebrow">Overview</p>
+        <ul class="sg-navlist">
+          <li><a href="#main-content">How to use</a></li>
+        </ul>
+        {nav.map((section) => (
+          <>
+            <p class="sg-eyebrow">{section.group}</p>
+            <ul class="sg-navlist">
+              {section.links.map((link) => (
+                <li><a href={link.href}>{link.label}</a></li>
+              ))}
+            </ul>
+          </>
+        ))}
+      </nav>
+
+      <main class="sg-content" id="main-content">
+        <section class="sg-intro">
+          <p class="sg-eyebrow">Overview</p>
+          <h1 class="sg-h1">How to use</h1>
+          <p class="sg-lede">
+            The swatches and scales below are read live from
+            <code>tokens.css</code> and <code>utilities.css</code> — if one
+            of those looks wrong, the source file is wrong (or this page is
+            stale). Everything else on this page — this text included — is
+            the style guide's own fixed UI chrome, defined independently in
+            <code>style-guide.css</code>, so importing new tokens can never
+            make the guide itself unreadable. Follow <code>CLAUDE.md</code>'s
+            build order before replacing any of this with real project
+            values.
+          </p>
+        </section>
+
+        <section class="sg-section" id="colors">
+          <p class="sg-eyebrow">Foundations</p>
+          <h2 class="sg-h2">Color palette</h2>
+          <p class="sg-lede">
+            Every swatch below is a token from <code>tokens.css</code> — all
+            placeholders, replaced with real values pulled from Figma once
+            this template becomes a real project.
+          </p>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Palette, live preview</p>
+            <div class="sg-swatches">
+              {paletteColors.map((c) => (
+                <div class="sg-swatch">
+                  <div class="sg-swatch__color" style={`background: var(${c.name})`} />
+                  <p class="sg-swatch__name">{c.label}</p>
+                  <p class="sg-caption">
+                    <code>{c.name}: <span class="sg-tokenval" data-token={c.name} /></code>
+                  </p>
+                  <p class="sg-caption">{c.usage}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Text color utilities</p>
+            <div class="sg-chips">
+              {textColorUtilities.map((u) => (
+                <span class="sg-chip">
+                  <span class={`sg-demo-text ${u.class}`}>{u.label}</span>
+                  <code><span class="sg-tokenval" data-token={u.token} /></code>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Background color utilities</p>
+            <div class="sg-swatches">
+              {backgroundColorUtilities.map((u) => (
+                <div class="sg-swatch">
+                  <div class={`sg-swatch__color ${u.class}`} />
+                  <p class="sg-swatch__name">{u.label}</p>
+                  <p class="sg-caption"><code><span class="sg-tokenval" data-token={u.token} /></code></p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section class="sg-section" id="typography">
+          <p class="sg-eyebrow">Foundations</p>
+          <h2 class="sg-h2">Typography</h2>
+          <p class="sg-lede">
+            Heading style overrides, the text-size scale, text styles, and
+            font weights — every <code>heading-style-</code>, <code>text-size-</code>,
+            <code>text-style-</code>, and <code>text-weight-</code> utility.
+          </p>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Heading style, live preview</p>
+            {headingScale.map((h) => (
+              <p class={h.class}>
+                {h.label}
+                <span class="sg-caption">
+                  {' '}— <code>{h.class}</code>{' '}
+                  (<code>{h.token}: <span class="sg-tokenval" data-token={h.token} /></code>)
+                </span>
+              </p>
+            ))}
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Text size scale</p>
+            {textSizeScale.map((t) => (
+              <p class={t.class}>
+                {t.label}
+                <span class="sg-caption">
+                  {' '}(<code>{t.token}: <span class="sg-tokenval" data-token={t.token} /></code>)
+                </span>
+              </p>
+            ))}
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Text style</p>
+            <div class="sg-stack">
+              {textStyles.map((s) => (
+                <p class={`sg-demo-text ${s.class}`}>{s.label} — the quick brown fox</p>
+              ))}
+            </div>
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Text weight</p>
+            <div class="sg-stack">
+              {textWeights.map((w) => (
+                <p class={`sg-demo-text ${w.class}`}>
+                  {w.label}
+                  <span class="sg-caption">
+                    {' '}(<code>{w.token}: <span class="sg-tokenval" data-token={w.token} /></code>)
+                  </span>
+                </p>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section class="sg-section" id="spacing">
+          <p class="sg-eyebrow">Foundations</p>
+          <h2 class="sg-h2">Spacing</h2>
+          <p class="sg-lede">
+            One scale, <code>--space-*</code>, behind every
+            <code>gap-*</code>, <code>margin-*</code>, and
+            <code>padding-*</code> utility (and component CSS). Section
+            top/bottom padding has its own short scale,
+            <code>--section-space-*</code>, used by <code>.section</code>.
+            See <a href="/class-system" class="sg-link">/class-system</a> for
+            the classes built on these.
+          </p>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Spacing scale (--space-*)</p>
+            <div class="sg-spacing">
+              {spaceScale.map((s) => (
+                <div class="sg-spacing__row">
+                  <code class="sg-spacing__label">{s.step}</code>
+                  <div class="sg-spacing__bar" style={`width: var(${s.name})`} />
+                  <code class="sg-tokenval" data-token={s.name} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Section rhythm (--section-space-*)</p>
+            <div class="sg-spacing">
+              {sectionSpacing.map((s) => (
+                <div class="sg-spacing__row">
+                  <code class="sg-spacing__label">section-top/bottom-{s.step}</code>
+                  <div class="sg-spacing__bar" style={`width: var(${s.name})`} />
+                  <code class="sg-tokenval" data-token={s.name} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section class="sg-section" id="radius">
+          <p class="sg-eyebrow">Foundations</p>
+          <h2 class="sg-h2">Radius</h2>
+          <p class="sg-lede">
+            Four steps — kept restrained on purpose. Confirm against real
+            component specs before adding a fifth.
+          </p>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Radius scale, live preview</p>
+            <div class="sg-swatches">
+              {radii.map((r) => (
+                <div class="sg-swatch">
+                  <div class="sg-swatch__color sg-swatch__color--radius" style={`border-radius: var(${r.name})`} />
+                  <p class="sg-swatch__name">{r.label}</p>
+                  <p class="sg-caption"><code>{r.name}</code></p>
+                  <p class="sg-caption">{r.note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section class="sg-section" id="containers">
+          <p class="sg-eyebrow">Foundations</p>
+          <h2 class="sg-h2">Containers</h2>
+          <p class="sg-lede">
+            Three max-widths cover most layouts, but Figma files rarely stay
+            that tidy. Check every distinct frame width via the
+            design-to-code tool before assuming one of these applies — if a
+            real frame doesn't match any of them, pull its exact value and
+            add a new <code>--container-*</code> token and
+            <code>.container-*</code> class rather than stretching the
+            closest one or hardcoding a one-off max-width in a component.
+            Put every container directly inside a <code>.section</code>,
+            which supplies the page gutter — that combination is what keeps
+            a section's content from ever running edge-to-edge or
+            off-screen on a narrow viewport.
+          </p>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Container scale, live preview</p>
+            {containers.map((c) => (
+              <div class="sg-container-demo">
+                <div class={`sg-container-demo__box ${c.class}`}>
+                  <code>{c.class} (<span class="sg-tokenval" data-token={c.name} />)</code>
+                </div>
+                <p class="sg-caption">{c.usage}</p>
+              </div>
+            ))}
+          </div>
+
+          <div class="sg-note">
+            <p class="sg-note__label">Note</p>
+            <p>
+              Placeholder scale — confirm against real Figma frame widths
+              before treating these three as final. Projects commonly need a
+              narrower tier too (long-form text, a form column) or a fourth,
+              wider one; don't force a real frame into the closest existing
+              value.
+            </p>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <div id="sg-frame-wrap" class="sg-framewrap" hidden>
+      <iframe
+        id="sg-frame"
+        class="sg-frame"
+        title="Style guide preview at a narrower breakpoint"
+        loading="lazy"
+      />
+    </div>
+
+    <script>
+      import '../scripts/sg-chrome';
+    </script>
+  </div>
+</BaseLayout>

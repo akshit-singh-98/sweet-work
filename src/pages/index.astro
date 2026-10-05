@@ -1,0 +1,451 @@
+---
+// Placeholder homepage — gets replaced entirely by the real homepage once
+// a dev clones this template and starts building against a real PRD. See
+// CLAUDE.md for the build order this page is standing in for.
+//
+// Deliberately does NOT use BaseLayout or tokens.css / utilities.css /
+// base.css: importing real Figma tokens at build-order step 2 must never
+// restyle this page. It reads only from src/styles/home.css. When the real
+// homepage replaces this file, build it on BaseLayout like every other
+// page, and delete home.css.
+import '../styles/home.css';
+
+const steps = [
+  {
+    title: 'PRD',
+    file: 'PRD.md',
+    body: 'Upload whatever you have — meeting transcripts, the project brief, scope docs, your own notes — and ask the agent to write PRD.md. With the full picture, it can draft the site map, list integrations and CMS needs, and flag gaps before any code exists.',
+  },
+  {
+    title: 'Design tokens + style guide',
+    file: 'tokens.css → /style-guide',
+    body: 'Connect Figma (or your design tool) to the agent and share the link to your file’s style guide page. It imports every color, type style, and spacing step, then rebuilds /style-guide around them — adding sections for anything extra, like icons, borders, or shadows. If a font isn’t publicly available, upload the font files or skip for now.',
+  },
+  {
+    title: 'Components',
+    file: 'COMPONENT_INVENTORY.md',
+    body: 'Share a Figma frame with your components laid out, and everything in it becomes a component. No frame? Skip it, and the agent builds the common set — buttons, navbar, footer. Each one is built from your tokens and added to the style guide in its own section.',
+  },
+  {
+    title: 'Content modeling',
+    file: 'sanity.example.ts',
+    body: 'If the site has a blog, case studies, or anything editors will update, tell the agent which content should live in the CMS. It drafts the schema from the PRD and inventory. Skip this step if every page is static.',
+  },
+  {
+    title: 'Pages',
+    file: 'src/pages/',
+    body: 'Share the full Figma frame for a page — the whole homepage, for example — and the agent builds the entire page from your tokens and components. Missing images get placeholders sized exactly like the real ones, so dropping in your exported assets later is a straight swap.',
+    tip: 'Add a few lines explaining each section — what it’s for, what’s dynamic, how it should behave — so the agent gets it right in one go.',
+  },
+  {
+    title: 'Visual QA',
+    file: 'Figma ↔ browser',
+    body: 'Open each finished section next to its Figma frame and compare them at every breakpoint. Ask the agent to check contrast, keyboard focus, and reduced motion too, and only sign off once it matches.',
+  },
+];
+
+// The build order, grouped into phases. Step numbers stay continuous
+// across phases (1–6), matching CLAUDE.md.
+const phases = [
+  {
+    title: 'Plan',
+    body: 'Get the full picture on paper before anything is designed or built.',
+    steps: steps.slice(0, 1),
+  },
+  {
+    title: 'Foundations',
+    body: 'Set up the design system, components, and content structure every page is built from.',
+    steps: steps.slice(1, 4),
+  },
+  {
+    title: 'Build',
+    body: 'Assemble the pages from those foundations, then check them against the design.',
+    steps: steps.slice(4),
+  },
+].map((phase, i, all) => ({
+  ...phase,
+  start: all.slice(0, i).reduce((n, p) => n + p.steps.length, 1),
+}));
+
+const features = [
+  {
+    title: 'No hardcoded values, enforced',
+    body: '`npm run lint:css` fails the build on any raw color, spacing, font size, or radius.',
+  },
+  {
+    title: 'A living style guide',
+    body: 'Tokens and components render live at /style-guide, with desktop, tablet, and mobile previews.',
+  },
+  {
+    title: 'Accessibility baseline, built in',
+    body: 'Skip link, visible keyboard focus, reduced-motion support, and a per-page title and meta description. Every image gets alt text: empty if decorative, written by the agent if meaningful, and asked about if unclear.',
+  },
+  {
+    title: 'Instructions for the agent',
+    body: 'CLAUDE.md covers the tricky parts: container widths, section padding, doubled borders, and flagging design inconsistencies instead of guessing.',
+  },
+  {
+    title: 'A fixed class system',
+    body: 'Every section is `section` → `container` → grid or flex, with one spacing scale and Client-First-style names — so pages get built from existing classes, not new ones. See /class-system.',
+  },
+  {
+    title: 'Assets handled by people',
+    body: 'Icons, logos, and images are exported from Figma by hand. Until then, sections use a clean image placeholder.',
+  },
+];
+
+// Renders `inline code` spans in the copy above.
+const withCode = (text: string) =>
+  text.replace(/`([^`]+)`/g, '<code class="home-code">$1</code>');
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sweet Work — The Agentic Dev Starter Template</title>
+    <meta
+      name="description"
+      content="Sweet Work gives Astro projects a proper build order, so a person or a coding agent builds from Figma consistently, step by step."
+    />
+  </head>
+  <body class="home">
+    <a href="#main-content" class="home-skip">Skip to content</a>
+
+    <main id="main-content" class="home-main">
+      <header class="home-hero">
+        <p class="home-eyebrow">The Agentic Dev Starter Template</p>
+        <h1 class="home-display">Sweet Work</h1>
+        <p class="home-lede">
+          Sweet Work gives your project a proper build order. Instead of
+          jumping straight from a Figma file to pages, you go step by step:
+          write the spec, pull the design system, name the components, then
+          build. Each step feeds the next, so whoever picks up the
+          project — you, a teammate, or a coding agent — builds it the same
+          consistent way.
+        </p>
+        <div class="home-actions">
+          <a href="/style-guide" class="home-button">View style guide</a>
+          <a href="/class-system" class="home-button home-button--secondary">View class system</a>
+        </div>
+      </header>
+
+      <section class="home-section" aria-labelledby="build-order">
+        <h2 id="build-order" class="home-h2">The build order</h2>
+        <p class="home-section-intro">
+          Six steps in three phases, in this order — here’s what you do at
+          each one. Don’t skip ahead: every step depends on the one before it.
+        </p>
+        <div class="home-phases">
+          {phases.map((phase, i) => (
+            <div class="home-phase">
+              <div class="home-phase__header">
+                <p class="home-phase__label">Phase {i + 1}</p>
+                <h3 class="home-phase__title">{phase.title}</h3>
+                <p class="home-body">{phase.body}</p>
+              </div>
+              <ol class="home-steps" start={phase.start}>
+                {phase.steps.map((step, j) => (
+                  <li class="home-step">
+                    <span class="home-step__num" aria-hidden="true">{phase.start + j}</span>
+                    <div>
+                      <h4 class="home-h3">
+                        {step.title}
+                        <code class="home-code">{step.file}</code>
+                      </h4>
+                      <p class="home-body">{step.body}</p>
+                      {step.tip && (
+                        <p class="home-tip">
+                          <span class="home-tip__label">Tip</span>
+                          {step.tip}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="home-section" aria-labelledby="also-included">
+        <h2 id="also-included" class="home-h2">Also built in</h2>
+        <ul class="home-features">
+          {features.map((f) => (
+            <li class="home-feature">
+              <h3 class="home-h3">{f.title}</h3>
+              <p class="home-body" set:html={withCode(f.body)} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>
+
+<style>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  .home {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--home-ink);
+    background: var(--home-bg);
+    font-family: var(--home-font-family);
+    font-size: var(--home-text-body);
+    line-height: var(--home-leading-normal);
+  }
+
+  .home :focus-visible {
+    outline: 0.125rem solid var(--home-accent);
+    outline-offset: 0.125rem;
+  }
+
+  .home-skip {
+    position: absolute;
+    top: -100%;
+    left: var(--home-space-xs);
+    padding: var(--home-space-xs) var(--home-space-sm);
+    border-radius: var(--home-radius);
+    color: var(--home-accent-ink);
+    background: var(--home-accent);
+    text-decoration: none;
+  }
+
+  .home-skip:focus-visible {
+    top: var(--home-space-xs);
+  }
+
+  .home-main {
+    max-width: var(--home-max-width);
+    margin: 0 auto;
+    padding: var(--home-space-xl) var(--home-space-md);
+  }
+
+  .home-hero {
+    padding-bottom: var(--home-space-lg);
+    border-bottom: 0.0625rem solid var(--home-border);
+  }
+
+  .home-eyebrow {
+    margin: 0 0 var(--home-space-sm);
+    color: var(--home-accent);
+    font-size: var(--home-text-xs);
+    font-weight: var(--home-weight-semibold);
+    letter-spacing: var(--home-tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .home-display {
+    margin: 0 0 var(--home-space-md);
+    font-size: var(--home-text-display);
+    font-weight: var(--home-weight-bold);
+    line-height: var(--home-leading-tight);
+    letter-spacing: var(--home-tracking-tight);
+  }
+
+  .home-lede {
+    max-width: var(--home-measure);
+    margin: 0 0 var(--home-space-md);
+    color: var(--home-secondary);
+    font-size: var(--home-text-lg);
+    line-height: var(--home-leading-normal);
+  }
+
+  .home-button {
+    display: inline-block;
+    padding: var(--home-space-xs) var(--home-space-md);
+    border-radius: var(--home-radius-pill);
+    color: var(--home-accent-ink);
+    background: var(--home-accent);
+    font-size: var(--home-text-sm);
+    font-weight: var(--home-weight-semibold);
+    text-decoration: none;
+  }
+
+  .home-button--secondary {
+    color: var(--home-ink);
+    background: transparent;
+    box-shadow: var(--home-outline);
+  }
+
+  .home-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--home-space-xs);
+  }
+
+  .home-section {
+    padding-top: var(--home-space-lg);
+  }
+
+  .home-h2 {
+    margin: 0 0 var(--home-space-xs);
+    font-size: var(--home-text-h2);
+    font-weight: var(--home-weight-bold);
+    line-height: var(--home-leading-snug);
+  }
+
+  .home-section-intro {
+    margin: 0 0 var(--home-space-md);
+    color: var(--home-secondary);
+  }
+
+  .home-h3 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--home-space-xs);
+    margin: 0 0 var(--home-space-2xs);
+    font-size: var(--home-text-h3);
+    font-weight: var(--home-weight-semibold);
+    line-height: var(--home-leading-snug);
+  }
+
+  .home-body {
+    margin: 0;
+    color: var(--home-secondary);
+  }
+
+  .home-code {
+    padding: 0 var(--home-space-2xs);
+    border-radius: var(--home-space-2xs);
+    color: var(--home-ink);
+    background: var(--home-bg-alt);
+    font-family: var(--home-mono-family);
+    font-size: var(--home-text-sm);
+    font-weight: var(--home-weight-regular);
+  }
+
+  .home-phases {
+    display: grid;
+    gap: var(--home-space-md);
+  }
+
+  /* Header column on the left, steps on the right; stacks on mobile. */
+  .home-phase {
+    display: grid;
+    grid-template-columns: 12.5rem 1fr;
+    gap: var(--home-space-md);
+    padding: var(--home-space-md);
+    border: 0.0625rem solid var(--home-border);
+    border-radius: var(--home-radius);
+  }
+
+  .home-phase__header {
+    padding-top: var(--home-space-md);
+  }
+
+  .home-phase__label {
+    margin: 0 0 var(--home-space-2xs);
+    color: var(--home-accent);
+    font-size: var(--home-text-xs);
+    font-weight: var(--home-weight-semibold);
+    letter-spacing: var(--home-tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .home-phase__title {
+    margin: 0 0 var(--home-space-xs);
+    font-size: var(--home-text-phase);
+    font-weight: var(--home-weight-bold);
+    line-height: var(--home-leading-snug);
+  }
+
+  .home-phase .home-body {
+    font-size: var(--home-text-sm);
+  }
+
+  .home-step .home-body {
+    font-size: var(--home-text-body);
+  }
+
+  .home-tip {
+    margin: var(--home-space-sm) 0 0;
+    padding: var(--home-space-xs) var(--home-space-sm);
+    border-left: 0.1875rem solid var(--home-accent);
+    border-radius: 0 var(--home-radius) var(--home-radius) 0;
+    color: var(--home-ink);
+    background: var(--home-tip-bg);
+    font-size: var(--home-text-sm);
+  }
+
+  .home-tip__label {
+    margin-right: var(--home-space-xs);
+    color: var(--home-accent);
+    font-weight: var(--home-weight-bold);
+  }
+
+  .home-steps,
+  .home-features {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Shared dividers between steps, not a full border per item. */
+  .home-step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--home-space-sm);
+    padding: var(--home-space-md) 0;
+  }
+
+  .home-step + .home-step {
+    border-top: 0.0625rem solid var(--home-border);
+  }
+
+  .home-step__num {
+    display: grid;
+    place-items: center;
+    width: var(--home-step-num-size);
+    height: var(--home-step-num-size);
+    border-radius: var(--home-radius-pill);
+    color: var(--home-accent-ink);
+    background: var(--home-ink);
+    font-size: var(--home-text-sm);
+    font-weight: var(--home-weight-bold);
+  }
+
+  .home-features {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--home-space-sm);
+  }
+
+  .home-feature {
+    padding: var(--home-space-md);
+    border-radius: var(--home-radius);
+    background: var(--home-bg-alt);
+  }
+
+  @media screen and (width <= 47.9375rem) {
+    .home-main {
+      padding: var(--home-space-lg) var(--home-space-sm);
+    }
+
+    .home-display {
+      font-size: var(--home-text-display-mobile);
+    }
+
+    .home-features,
+    .home-phase {
+      grid-template-columns: 1fr;
+    }
+
+    .home-phase {
+      gap: 0;
+      padding: var(--home-space-sm);
+    }
+
+    .home-phase__header {
+      padding-top: 0;
+      padding-bottom: var(--home-space-xs);
+    }
+  }
+</style>

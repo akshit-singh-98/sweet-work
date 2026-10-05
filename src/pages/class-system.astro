@@ -1,0 +1,868 @@
+---
+// Class system reference — every layout and utility class in the project,
+// rendered live, plus the page structure, cascade layers, and component
+// conventions they add up to. Companion to /style-guide (which shows the
+// tokens); this page shows the classes built on them.
+//
+// Chrome (panels, nav, headings, demo frames) comes from style-guide.css
+// and is unlayered, so real tokens can never restyle it. Everything inside
+// a demo frame uses the REAL classes from layout.css / utilities.css — that
+// is the point of the page. Demo cells are divs, not headings/paragraphs,
+// so the chrome's margin rules never leak into a demo.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/style-guide.css';
+
+const nav = [
+  {
+    group: 'Overview',
+    links: [
+      { href: '#principles', label: 'Principles' },
+      { href: '#structure', label: 'Page structure' },
+      { href: '#layers', label: 'Cascade layers' },
+    ],
+  },
+  {
+    group: 'Layout',
+    links: [
+      { href: '#section', label: 'Section' },
+      { href: '#container', label: 'Container' },
+      { href: '#grid', label: 'Grid' },
+      { href: '#flex', label: 'Flex & alignment' },
+    ],
+  },
+  {
+    group: 'Spacing',
+    links: [
+      { href: '#gap', label: 'Gap' },
+      { href: '#margin-padding', label: 'Margin & padding' },
+    ],
+  },
+  {
+    group: 'Everything else',
+    links: [
+      { href: '#type-color', label: 'Type & color' },
+      { href: '#other', label: 'Other utilities' },
+      { href: '#breakpoints', label: 'Breakpoint variants' },
+    ],
+  },
+  {
+    group: 'Building',
+    links: [
+      { href: '#components', label: 'Component setup' },
+      { href: '#rules', label: 'Rules for the agent' },
+      { href: '#migration', label: 'From Client-First' },
+    ],
+  },
+];
+
+const principles = [
+  {
+    title: 'One way to do each thing',
+    body: 'Every layout need maps to exactly one class family. There are no equivalent alternatives to choose between, so every page ends up built the same way.',
+  },
+  {
+    title: 'One class, one job',
+    body: 'Every class works on its own. No pairs like margin-top + margin-small that silently break when half is forgotten — it’s margin-top-small.',
+  },
+  {
+    title: 'Structure in classes, looks in components',
+    body: 'Sections, containers, grids, flex, gap, and spacing always come from classes in the markup. A component’s CSS only covers what’s unique to it: padding, borders, backgrounds, shadows, hover states.',
+  },
+  {
+    title: 'Responsive by default',
+    body: 'Grids collapse and spacing tokens shrink at tablet and mobile on their own. A -tablet / -mobile-landscape / -mobile-portrait suffix is only for changing the default.',
+  },
+  {
+    title: 'A cascade you can predict',
+    body: 'Five cascade layers decide what wins, not selector specificity. A utility class on an element always wins, so instance tweaks never need !important.',
+  },
+];
+
+const structureCode = `<section class="section section_features">
+  <div class="container-large">
+    <div class="flex-vertical gap-xlarge">
+      <div class="flex-vertical gap-small max-width-medium">
+        <h2 class="heading-style-h2">Features</h2>
+        <p class="text-size-medium">Everything you need…</p>
+      </div>
+      <div class="grid-3col gap-large">
+        <FeatureCard … />
+        <FeatureCard … />
+        <FeatureCard … />
+      </div>
+    </div>
+  </div>
+</section>`;
+
+const structureLevels = [
+  { name: 'section', body: 'Full-width band. Carries top/bottom padding and the side page gutter. Backgrounds go here. section_[name] identifies it and is the hook for any section-specific CSS.' },
+  { name: 'container-*', body: 'Caps the content width and centers it. Exactly one per section, directly inside it.' },
+  { name: 'grid-* / flex-*', body: 'Arranges children, spaced with gap-*. Nest as deep as needed.' },
+  { name: 'content', body: 'Components, plus text styled with heading-style-* / text-size-* classes.' },
+];
+
+// Lowest priority first — rendered bottom-up.
+const layers = [
+  { name: 'reset', file: 'base.css', body: 'box-sizing, margin reset, media defaults' },
+  { name: 'base', file: 'base.css', body: 'body type and color, focus ring, skip link, reduced motion' },
+  { name: 'layout', file: 'layout.css', body: 'section, container, grid-*, flex-*' },
+  { name: 'components', file: 'each component’s <style>', body: 'a component’s own look — padding, borders, backgrounds, hover, internals' },
+  { name: 'utilities', file: 'utilities.css', body: 'gap, margin, padding, type, color, visibility — always wins' },
+];
+
+const componentLayerCode = `<style>
+  @layer components {
+    .card {
+      padding: var(--space-large);
+      border-radius: var(--radius-lg);
+    }
+  }
+</style>`;
+
+const sizeSteps = ['small', 'medium', 'large', 'xlarge'];
+
+const sectionClasses = [
+  { cls: 'section', body: 'Required on every section. Top/bottom padding defaults to medium; left/right is the page gutter (--padding-global).' },
+  { cls: 'section-top-{none|small|medium|large|xlarge}', body: 'Top padding, from --section-space-*.' },
+  { cls: 'section-bottom-{none|small|medium|large|xlarge}', body: 'Bottom padding, from --section-space-*.' },
+  { cls: 'section-full-bleed', body: 'Drops the side gutter for edge-to-edge content. Give anything inside that still needs it .padding-global.' },
+  { cls: 'padding-global', body: 'The side gutter on its own, for wrappers that aren’t a section: navbar, footer bar, banner.' },
+];
+
+const sectionDemos = [
+  { cls: 'section', note: 'default — medium top and bottom' },
+  { cls: 'section section-top-large section-bottom-small', note: 'large top, small bottom' },
+  { cls: 'section section-top-none section-bottom-none', note: 'no vertical padding — e.g. the second of two sections sharing a background' },
+  { cls: 'section section-full-bleed section-top-small section-bottom-small', note: 'no side gutter — content reaches the edge' },
+];
+
+const containers = [
+  { cls: 'container-small', token: '--container-small', usage: 'Text-heavy content: articles, forms' },
+  { cls: 'container-medium', token: '--container-medium', usage: 'Focused sections' },
+  { cls: 'container-large', token: '--container-large', usage: 'Most marketing sections' },
+  { cls: 'container-full', token: null, usage: 'No cap — full width inside the gutter' },
+];
+
+const equalGrids = [1, 2, 3, 4, 5, 6];
+
+const gridResponsive = [
+  ['grid-2col', '2', '2', '1', '1'],
+  ['grid-3col', '3', '3', '1', '1'],
+  ['grid-4col', '4', '2', '1', '1'],
+  ['grid-5col / grid-6col', '5 / 6', '3', '2', '2'],
+  ['grid-2col-wide-left / -right', '2 : 1', '2 : 1', '1', '1'],
+  ['grid-auto-small / medium / large', 'as many as fit', '←', '←', '←'],
+];
+
+const flexDemos = [
+  { cls: 'flex-horizontal gap-small', cells: ['A', 'B', 'C'], note: 'a row' },
+  { cls: 'flex-vertical gap-small', cells: ['A', 'B', 'C'], note: 'a column' },
+  { cls: 'flex-horizontal gap-small justify-content-between', cells: ['A', 'B', 'C'], note: 'space between' },
+  { cls: 'flex-horizontal gap-small justify-content-center', cells: ['A', 'B', 'C'], note: 'centered' },
+  { cls: 'flex-horizontal gap-small flex-wrap', cells: ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'], note: 'wraps onto new lines' },
+  { cls: 'flex-horizontal gap-small flex-vertical-mobile-landscape', cells: ['A', 'B', 'C'], note: 'a row that stacks at mobile — try the Mobile preview' },
+];
+
+const alignClasses = [
+  { cls: 'align-items-{start|center|end|stretch|baseline}', body: 'Cross-axis alignment of children (flex and grid).' },
+  { cls: 'justify-content-{start|center|end|between|around}', body: 'Main-axis distribution of children.' },
+  { cls: 'align-self-{start|center|end|stretch}', body: 'One child’s own cross-axis alignment.' },
+  { cls: 'flex-wrap', body: 'Let a row wrap onto new lines.' },
+  { cls: 'flex-grow', body: 'On a child: take up the remaining space.' },
+  { cls: 'flex-none', body: 'On a child: never grow or shrink.' },
+];
+
+const spaceSteps = ['xxsmall', 'xsmall', 'small', 'medium', 'large', 'xlarge', 'xxlarge', 'huge', 'xhuge'];
+
+const spacingFamilies = [
+  { cls: 'gap-{size}', body: 'Space between grid/flex children. The default way to space siblings.' },
+  { cls: 'gap-row-{size} / gap-column-{size}', body: 'One direction only; overrides gap-{size}.' },
+  { cls: 'margin-top-{size} / margin-bottom-{size}', body: 'Vertical only, for when gap can’t do it (pulling one element away from its siblings). Horizontal spacing is always gap.' },
+  { cls: 'margin-x-auto', body: 'Center a block that has a max-width.' },
+  { cls: 'padding-{size}', body: 'All sides.' },
+  { cls: 'padding-x-{size} / padding-y-{size}', body: 'Left + right / top + bottom.' },
+];
+
+const paddingDemos = ['padding-small', 'padding-xlarge', 'padding-x-xlarge padding-y-xsmall'];
+
+const typeFamilies = [
+  { cls: 'heading-style-h1 … h6', body: 'Heading look on any element, independent of its tag. Step 2 adds one class per Figma text style (e.g. heading-style-display).' },
+  { cls: 'text-size-{large|medium|regular|small|tiny}', body: 'Body text sizes.' },
+  { cls: 'text-weight-{light|normal|medium|semibold|bold}', body: 'Font weight.' },
+  { cls: 'text-style-{allcaps|italic|link|nowrap|balance|strikethrough|2lines|3lines}', body: 'One-off text treatments. 2lines / 3lines truncate with an ellipsis.' },
+  { cls: 'text-align-{left|center|right}', body: 'Alignment. -tablet / -mobile-landscape / -mobile-portrait variants for left and center.' },
+  { cls: 'text-color-{name}', body: 'One class per text color. Step 2 replaces the set with Figma’s.' },
+  { cls: 'background-color-{name}', body: 'One class per surface color. Step 2 replaces the set with Figma’s.' },
+];
+
+const otherFamilies = [
+  { group: 'Radius', cls: 'radius-{small|medium|large|full}', body: 'Corner radius from --radius-*.' },
+  { group: 'Max width', cls: 'max-width-{xxsmall … xxlarge} / max-width-full', body: 'Limit an element inside a container, e.g. a text column. Pair with margin-x-auto to center.' },
+  { group: 'Icon size', cls: 'icon-1x1-{small|medium|large} / icon-height-*', body: 'Square icon box, or height only.' },
+  { group: 'Media', cls: 'aspect-ratio-{square|portrait|landscape|widescreen}', body: 'Fixed aspect ratio.' },
+  { group: 'Media', cls: 'image-fill', body: 'The real image inside an image slot — fills it like <ImagePlaceholder /> does.' },
+  { group: 'Position', cls: 'position-relative / layer / z-index-{1|2}', body: 'layer absolutely fills its nearest positioned parent.' },
+  { group: 'Overflow', cls: 'overflow-hidden / overflow-auto / pointer-events-none', body: '' },
+  { group: 'Visibility', cls: 'hide / visually-hidden', body: 'hide removes for everyone; visually-hidden keeps it for screen readers only.' },
+];
+
+const breakpoints = [
+  { suffix: '-tablet', width: '≤ 61.9375rem (991px)' },
+  { suffix: '-mobile-landscape', width: '≤ 47.9375rem (767px)' },
+  { suffix: '-mobile-portrait', width: '≤ 29.9375rem (479px)' },
+];
+
+const responsiveClasses = [
+  'grid-{1|2|3|4}col-{bp}',
+  'flex-vertical-{bp} / flex-horizontal-{bp}',
+  'hide-{bp}',
+  'max-width-full-{bp}',
+  'text-align-{left|center}-{bp}',
+];
+
+const componentCode = `---
+// src/components/elements/Card.astro
+import ImagePlaceholder from '../global/ImagePlaceholder.astro';
+
+interface Props {
+  title: string;
+  imageAlt: string;
+  featured?: boolean;
+  class?: string;
+}
+const { title, imageAlt, featured = false, class: className } = Astro.props;
+---
+<article class:list={['card', 'flex-vertical', 'gap-small', { 'is-featured': featured }, className]}>
+  <div class="card_image aspect-ratio-landscape">
+    <ImagePlaceholder alt={imageAlt} />
+  </div>
+  <h3 class="card_title heading-style-h5">{title}</h3>
+  <slot />
+</article>
+
+<style>
+  @layer components {
+    .card {
+      padding: var(--space-large);
+      border-radius: var(--radius-lg);
+      background: var(--color-bg-secondary);
+    }
+
+    .card.is-featured {
+      background: var(--color-bg-alternate);
+    }
+
+    .card_image {
+      overflow: hidden;
+      border-radius: var(--radius-md);
+    }
+  }
+</style>`;
+
+const componentUsageCode = `<div class="grid-3col gap-large">
+  <Card title="Fast" imageAlt="…" />
+  <Card title="Flexible" imageAlt="…" featured />
+  <Card title="Accessible" imageAlt="…" class="hide-mobile-landscape" />
+</div>`;
+
+const naming = [
+  { pattern: 'card, navbar, feature-card', body: 'Root class = the component’s name, kebab-case, matching the file name (FeatureCard.astro → feature-card).' },
+  { pattern: 'card_image, navbar_link', body: 'Parts = {root}_{part}. Only for elements that need their own CSS; a part that’s pure layout just uses layout classes.' },
+  { pattern: 'section_hero, hero_content', body: 'Section components: section_{name} sits next to .section on the root; its parts are {name}_{part}.' },
+  { pattern: 'is-featured, is-active', body: 'Variants and states: an is-{name} class on the root (or part), switched on by a prop. Styled as .card.is-featured.' },
+];
+
+const rules = [
+  'Every section is section + section_[name] → one container-* → grid-* / flex-* with gap-*.',
+  'Before writing any CSS, look for the class on this page. Structure and spacing are almost always a class that already exists.',
+  'Component CSS covers only the component’s own look (padding, border, background, radius, shadow, hover, transitions) — never display/grid/flex/gap/columns a layout class already provides.',
+  'Every component’s style block is wrapped in a single @layer components block. npm run lint:css fails the build if one isn’t.',
+  'Every component accepts a class prop and puts it on its root, so utilities can be added per instance.',
+  'Need a value that doesn’t exist? Add the token to tokens.css first. Then, if it’s needed as a class, add it as a new step in an existing family (e.g. gap-xxxlarge) with the same naming.',
+  'Never invent a new class family, a one-off global class, an inline style, or !important. If something truly doesn’t fit, stop and ask.',
+];
+
+const migration = [
+  ['padding-global + container-large + padding-section-large', 'section section-top-large section-bottom-large + container-large'],
+  ['padding-section-{size}', 'section-top-{size} + section-bottom-{size} (medium is the default)'],
+  ['margin-top margin-small', 'margin-top-small'],
+  ['padding-bottom padding-large (as a spacer)', 'gap-large on the parent'],
+  ['spacer-{size}', 'gap-{size} on the parent'],
+  ['align-center', 'margin-x-auto'],
+  ['text-style-muted / text-style-quote', 'text-color-secondary / text-style-italic'],
+  ['display-inlineflex, spacing-clean', 'removed — component CSS'],
+  ['--space-cf-* + --space-2xs … 3xl', 'one scale: --space-xxsmall … --space-xhuge'],
+  ['— (set in the Webflow Designer)', 'new: grid-*, flex-*, gap-*, align-items-*, justify-content-*'],
+];
+---
+<BaseLayout
+  title="Class System — Sweet Work"
+  description="Every layout and utility class in the project, rendered live."
+>
+  <div class="sg sg-root">
+    <header class="sg-titlebar">
+      <a href="/" class="sg-titlebar__name">Sweet Work</a>
+      <span class="sg-titlebar__divider">|</span>
+      <nav class="sg-titlebar__nav" aria-label="Tool pages">
+        <a href="/style-guide" class="sg-titlebar__link">Style guide</a>
+        <a href="/class-system" class="sg-titlebar__link" aria-current="page">Class system</a>
+      </nav>
+    </header>
+
+    <div id="sg-bpbar" class="sg-bpbar" hidden>
+      <span class="sg-bpbar__label">Preview at</span>
+      <div class="sg-bptoggle" role="group" aria-label="Preview breakpoint">
+        <button type="button" class="sg-bpbtn" data-breakpoint="desktop" aria-pressed="true">Desktop</button>
+        <button type="button" class="sg-bpbtn" data-breakpoint="tablet" aria-pressed="false">Tablet</button>
+        <button type="button" class="sg-bpbtn" data-breakpoint="mobile" aria-pressed="false">Mobile</button>
+      </div>
+      <span class="sg-bpbar__hint">
+        Tablet/mobile render this page in a real iframe at that width — watch
+        the grids collapse and the spacing tokens shrink.
+      </span>
+    </div>
+
+    <div id="sg-live" class="sg-shell">
+      <nav class="sg-sidebar" aria-label="Class system sections">
+        {nav.map((section) => (
+          <>
+            <p class="sg-eyebrow">{section.group}</p>
+            <ul class="sg-navlist">
+              {section.links.map((link) => (
+                <li><a href={link.href}>{link.label}</a></li>
+              ))}
+            </ul>
+          </>
+        ))}
+      </nav>
+
+      <main class="sg-content" id="main-content">
+        <section class="sg-intro">
+          <p class="sg-eyebrow">Overview</p>
+          <h1 class="sg-h1">Class system</h1>
+          <p class="sg-lede">
+            A fixed set of classes every page is built from, so an agent (or a
+            person) never has to invent a new one. Client-First-style names,
+            but reorganized for how code actually gets written: a section →
+            container → layout structure, one spacing scale, one class per
+            job, and cascade layers instead of specificity. Everything in the
+            frames below is the real CSS from <code>layout.css</code> and
+            <code>utilities.css</code>.
+          </p>
+        </section>
+
+        <section class="sg-section" id="principles">
+          <p class="sg-eyebrow">Overview</p>
+          <h2 class="sg-h2">Principles</h2>
+          <div class="sg-panel">
+            <ol class="sg-list">
+              {principles.map((p) => (
+                <li><strong>{p.title}.</strong> {p.body}</li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section class="sg-section" id="structure">
+          <p class="sg-eyebrow">Overview</p>
+          <h2 class="sg-h2">Page structure</h2>
+          <p class="sg-lede">
+            Every section follows the same four levels. Learn this once and
+            every page reads the same.
+          </p>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Markup</p>
+            <pre class="sg-pre"><code>{structureCode}</code></pre>
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Rendered (real classes)</p>
+            <div class="section section-top-small section-bottom-small sg-demo-section">
+              <div class="container-large sg-demo-container">
+                <div class="flex-vertical gap-xlarge">
+                  <div class="flex-vertical gap-small max-width-medium">
+                    <div class="sg-cell">heading-style-h2</div>
+                    <div class="sg-cell">text-size-medium</div>
+                  </div>
+                  <div class="grid-3col gap-large">
+                    <div class="sg-cell sg-cell-tall">FeatureCard</div>
+                    <div class="sg-cell sg-cell-tall">FeatureCard</div>
+                    <div class="sg-cell sg-cell-tall">FeatureCard</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="sg-caption">
+              Blue band = <code>section</code> (its padding is the space
+              around the white box). White box = <code>container-large</code>.
+            </p>
+          </div>
+
+          <div class="sg-panel">
+            <table class="sg-table">
+              <thead><tr><th>Level</th><th>What it does</th></tr></thead>
+              <tbody>
+                {structureLevels.map((l) => (
+                  <tr><td><code>{l.name}</code></td><td>{l.body}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="sg-section" id="layers">
+          <p class="sg-eyebrow">Overview</p>
+          <h2 class="sg-h2">Cascade layers</h2>
+          <p class="sg-lede">
+            CSS is split into five cascade layers. A later layer always beats
+            an earlier one, whatever the selectors — so base styles sit at the
+            bottom, component CSS above layout, and utilities on top. Adding
+            <code>hide-mobile-landscape</code> to a component instance just
+            works, even though the component sets its own
+            <code>display</code>.
+          </p>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Highest priority at the top</p>
+            <ol class="sg-layers">
+              {layers.map((l) => (
+                <li class="sg-layer">
+                  <span class="sg-layer__name">{l.name}</span>
+                  <span>{l.body} <span class="sg-caption">— {l.file}</span></span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div class="sg-cols">
+            <div class="sg-panel">
+              <p class="sg-panel__header"><span class="sg-dot"></span>Every component’s &lt;style&gt;</p>
+              <pre class="sg-pre"><code>{componentLayerCode}</code></pre>
+              <p class="sg-caption">
+                Unlayered CSS beats every layer, so a component that forgets
+                the wrapper would override utilities. <code>npm run lint:css</code>
+                fails the build if a wrapper is missing.
+              </p>
+            </div>
+            <div class="sg-panel">
+              <p class="sg-panel__header"><span class="sg-dot"></span>Where it’s declared</p>
+              <ul class="sg-list">
+                <li>Order: <code>base.css</code>, and inline as the first thing in <code>BaseLayout</code>’s &lt;head&gt;, so it’s set before any stylesheet loads.</li>
+                <li>This page’s and the style guide’s own chrome is deliberately unlayered — it wins over everything, so real tokens can’t restyle the tools.</li>
+                <li>Inside the layers, <code>!important</code> is never needed.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="sg-section" id="section">
+          <p class="sg-eyebrow">Layout</p>
+          <h2 class="sg-h2">Section</h2>
+          <p class="sg-lede">
+            The outer wrapper of every section. Top and bottom are set
+            independently, from their own short scale
+            (<code>--section-space-*</code>), because Figma sections usually
+            settle on a few values of their own.
+          </p>
+
+          <div class="sg-panel">
+            <table class="sg-table">
+              <thead><tr><th>Class</th><th>What it does</th></tr></thead>
+              <tbody>
+                {sectionClasses.map((c) => (
+                  <tr><td><code>{c.cls}</code></td><td>{c.body}</td></tr>
+                ))}
+              </tbody>
+            </table>
+            <p class="sg-caption">
+              Current values:
+              {sizeSteps.map((s, i) => (
+                <>{i > 0 && ' · '}{`${s} `}<span class="sg-tokenval" data-token={`--section-space-${s}`} /></>
+              ))}
+              {' · gutter '}<span class="sg-tokenval" data-token="--padding-global" />
+            </p>
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Live</p>
+            {sectionDemos.map((d) => (
+              <div class="sg-demo-frame">
+                <p class="sg-demo-label">{d.cls} — {d.note}</p>
+                <div class={`${d.cls} sg-demo-section`}>
+                  <div class="container-large sg-demo-container">
+                    <div class="sg-cell">content</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section class="sg-section" id="container">
+          <p class="sg-eyebrow">Layout</p>
+          <h2 class="sg-h2">Container</h2>
+          <p class="sg-lede">
+            Caps the content width and centers it. One per section. It can
+            share an element with a layout class
+            (<code>class="container-large grid-2col"</code>). If a Figma frame
+            doesn't match any of these, add a token and a class — see
+            <code>CLAUDE.md</code> "Container widths".
+          </p>
+          <div class="sg-panel">
+            {containers.map((c) => (
+              <div class="sg-demo-frame">
+                <p class="sg-demo-label">
+                  {c.cls}{c.token && <> — <span class="sg-tokenval" data-token={c.token} /></>} — {c.usage}
+                </p>
+                <div class={`${c.cls} sg-demo`}>
+                  <div class="sg-cell">{c.cls}</div>
+                </div>
+              </div>
+            ))}
+            <p class="sg-caption">This column is narrower than 60rem, so medium and large look the same here.</p>
+          </div>
+        </section>
+
+        <section class="sg-section" id="grid">
+          <p class="sg-eyebrow">Layout</p>
+          <h2 class="sg-h2">Grid</h2>
+          <p class="sg-lede">
+            Each grid class is complete on its own — <code>grid-3col</code> is
+            a grid; there's no separate <code>.grid</code> to forget. Gap comes
+            from <code>gap-*</code>. Use the Tablet / Mobile preview above to
+            see them collapse.
+          </p>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Equal columns</p>
+            {equalGrids.map((n) => (
+              <div class="sg-demo-frame">
+                <p class="sg-demo-label">grid-{n}col gap-small</p>
+                <div class={`grid-${n}col gap-small`}>
+                  {Array.from({ length: n }, (_, i) => <div class="sg-cell">{i + 1}</div>)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Uneven columns</p>
+            {['grid-2col-wide-left', 'grid-2col-wide-right'].map((cls) => (
+              <div class="sg-demo-frame">
+                <p class="sg-demo-label">{cls} gap-medium</p>
+                <div class={`${cls} gap-medium`}>
+                  <div class="sg-cell sg-cell-tall">{cls.endsWith('left') ? '2fr' : '1fr'}</div>
+                  <div class="sg-cell sg-cell-tall">{cls.endsWith('left') ? '1fr' : '2fr'}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Auto-fit — wraps on its own, no breakpoints</p>
+            {['small', 'medium', 'large'].map((size) => (
+              <div class="sg-demo-frame">
+                <p class="sg-demo-label">grid-auto-{size} gap-small — columns at least <span class="sg-tokenval" data-token={`--grid-min-${size}`} /></p>
+                <div class={`grid-auto-${size} gap-small`}>
+                  {Array.from({ length: 6 }, (_, i) => <div class="sg-cell">{i + 1}</div>)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Spanning and overriding</p>
+            <div class="sg-demo-frame">
+              <p class="sg-demo-label">grid-4col gap-small — children: col-span-2, col-span-full</p>
+              <div class="grid-4col gap-small">
+                <div class="sg-cell col-span-2">col-span-2</div>
+                <div class="sg-cell">1</div>
+                <div class="sg-cell">1</div>
+                <div class="sg-cell col-span-full">col-span-full</div>
+              </div>
+            </div>
+            <div class="sg-demo-frame">
+              <p class="sg-demo-label">grid-4col grid-2col-mobile-landscape gap-small — stays 2 columns on mobile</p>
+              <div class="grid-4col grid-2col-mobile-landscape gap-small">
+                {Array.from({ length: 4 }, (_, i) => <div class="sg-cell">{i + 1}</div>)}
+              </div>
+            </div>
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Default responsive behavior (columns)</p>
+            <div class="sg-tablewrap">
+              <table class="sg-table">
+                <thead><tr><th>Class</th><th>Desktop</th><th>Tablet</th><th>Mobile L</th><th>Mobile P</th></tr></thead>
+                <tbody>
+                  {gridResponsive.map((row) => (
+                    <tr>{row.map((cell, i) => (i === 0 ? <td><code>{cell}</code></td> : <td>{cell}</td>))}</tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p class="sg-caption">
+              Override with <code>grid-{'{1|2|3|4}'}col-tablet</code>,
+              <code>-mobile-landscape</code>, <code>-mobile-portrait</code>.
+              An override holds at that width and below, replacing the
+              default collapse: <code>grid-3col grid-2col-tablet</code> stays
+              2 columns on mobile too.
+            </p>
+          </div>
+        </section>
+
+        <section class="sg-section" id="flex">
+          <p class="sg-eyebrow">Layout</p>
+          <h2 class="sg-h2">Flex &amp; alignment</h2>
+          <p class="sg-lede">
+            <code>flex-horizontal</code> is a row, <code>flex-vertical</code> a
+            column. Alignment classes mirror the CSS property names exactly and
+            work on grids too.
+          </p>
+
+          <div class="sg-panel">
+            {flexDemos.map((d) => (
+              <div class="sg-demo-frame">
+                <p class="sg-demo-label">{d.cls} — {d.note}</p>
+                <div class={`${d.cls} sg-demo`}>
+                  {d.cells.map((c) => <div class="sg-cell">{c}</div>)}
+                </div>
+              </div>
+            ))}
+            <div class="sg-demo-frame">
+              <p class="sg-demo-label">flex-horizontal gap-small align-items-center — middle child: flex-grow</p>
+              <div class="flex-horizontal gap-small align-items-center sg-demo">
+                <div class="sg-cell sg-cell-tall">tall</div>
+                <div class="sg-cell flex-grow">flex-grow</div>
+                <div class="sg-cell">short</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sg-panel">
+            <table class="sg-table">
+              <thead><tr><th>Class</th><th>What it does</th></tr></thead>
+              <tbody>
+                {alignClasses.map((c) => (
+                  <tr><td><code>{c.cls}</code></td><td>{c.body}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="sg-section" id="gap">
+          <p class="sg-eyebrow">Spacing</p>
+          <h2 class="sg-h2">Gap</h2>
+          <p class="sg-lede">
+            One scale for all spacing — <code>none · xxsmall · xsmall · small
+            · medium · large · xlarge · xxlarge · huge · xhuge</code> — shared
+            by gap, margin, and padding. Live values below.
+          </p>
+          <div class="sg-panel">
+            {spaceSteps.map((s) => (
+              <div class="sg-demo-frame">
+                <p class="sg-demo-label">gap-{s} — <span class="sg-tokenval" data-token={`--space-${s}`} /></p>
+                <div class={`flex-horizontal gap-${s}`}>
+                  <div class="sg-cell">A</div>
+                  <div class="sg-cell">B</div>
+                  <div class="sg-cell">C</div>
+                </div>
+              </div>
+            ))}
+            <div class="sg-demo-frame">
+              <p class="sg-demo-label">grid-3col gap-row-xlarge gap-column-xsmall</p>
+              <div class="grid-3col gap-row-xlarge gap-column-xsmall">
+                {Array.from({ length: 6 }, (_, i) => <div class="sg-cell">{i + 1}</div>)}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="sg-section" id="margin-padding">
+          <p class="sg-eyebrow">Spacing</p>
+          <h2 class="sg-h2">Margin &amp; padding</h2>
+          <p class="sg-lede">
+            Single classes, same scale. Prefer <code>gap</code> on the parent;
+            reach for margin only when one element needs to break from its
+            siblings' rhythm.
+          </p>
+          <div class="sg-panel">
+            <table class="sg-table">
+              <thead><tr><th>Class</th><th>What it does</th></tr></thead>
+              <tbody>
+                {spacingFamilies.map((c) => (
+                  <tr><td><code>{c.cls}</code></td><td>{c.body}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Live</p>
+            {paddingDemos.map((cls) => (
+              <div class="sg-demo-frame">
+                <p class="sg-demo-label">{cls}</p>
+                <div class={`${cls} sg-demo`}>
+                  <div class="sg-cell">content</div>
+                </div>
+              </div>
+            ))}
+            <div class="sg-demo-frame">
+              <p class="sg-demo-label">flex-vertical gap-xsmall — third child: margin-top-xlarge</p>
+              <div class="flex-vertical gap-xsmall">
+                <div class="sg-cell">1</div>
+                <div class="sg-cell">2</div>
+                <div class="sg-cell margin-top-xlarge">margin-top-xlarge</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="sg-section" id="type-color">
+          <p class="sg-eyebrow">Everything else</p>
+          <h2 class="sg-h2">Type &amp; color</h2>
+          <p class="sg-lede">
+            Same families as before. Their values (and, for colors and text
+            styles, the class list itself) come from Figma in step 2 — see
+            them rendered on the <a class="sg-link" href="/style-guide">style guide</a>.
+          </p>
+          <div class="sg-panel">
+            <table class="sg-table">
+              <thead><tr><th>Class</th><th>What it does</th></tr></thead>
+              <tbody>
+                {typeFamilies.map((c) => (
+                  <tr><td><code>{c.cls}</code></td><td>{c.body}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="sg-section" id="other">
+          <p class="sg-eyebrow">Everything else</p>
+          <h2 class="sg-h2">Other utilities</h2>
+          <div class="sg-panel">
+            <table class="sg-table">
+              <thead><tr><th>Group</th><th>Class</th><th>What it does</th></tr></thead>
+              <tbody>
+                {otherFamilies.map((c) => (
+                  <tr><td>{c.group}</td><td><code>{c.cls}</code></td><td>{c.body}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="sg-section" id="breakpoints">
+          <p class="sg-eyebrow">Everything else</p>
+          <h2 class="sg-h2">Breakpoint variants</h2>
+          <p class="sg-lede">
+            One rule: append the breakpoint name to a class to apply it at
+            that width and below. Only the classes that genuinely need it have
+            variants.
+          </p>
+          <div class="sg-cols">
+            <div class="sg-panel">
+              <table class="sg-table">
+                <thead><tr><th>Suffix</th><th>Applies at</th></tr></thead>
+                <tbody>
+                  {breakpoints.map((b) => (
+                    <tr><td><code>{b.suffix}</code></td><td>{b.width}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div class="sg-panel">
+              <p class="sg-panel__header"><span class="sg-dot"></span>Classes with variants</p>
+              <ul class="sg-list">
+                {responsiveClasses.map((c) => <li><code>{c}</code></li>)}
+              </ul>
+              <p class="sg-caption">grid-{'{3|4}'}col-mobile-portrait isn't offered — four columns don't fit a phone.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="sg-section" id="components">
+          <p class="sg-eyebrow">Building</p>
+          <h2 class="sg-h2">Component setup</h2>
+          <p class="sg-lede">
+            A component's markup uses layout and utility classes for its
+            structure; its own <code>&lt;style&gt;</code> only holds what makes
+            it look like itself. Global / elements / sections folders stay as
+            they are.
+          </p>
+
+          <div class="sg-panel">
+            <table class="sg-table">
+              <thead><tr><th>Name</th><th>Convention</th></tr></thead>
+              <tbody>
+                {naming.map((n) => (
+                  <tr><td><code>{n.pattern}</code></td><td>{n.body}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Anatomy of a component</p>
+            <pre class="sg-pre"><code>{componentCode}</code></pre>
+          </div>
+
+          <div class="sg-panel">
+            <p class="sg-panel__header"><span class="sg-dot"></span>Using it</p>
+            <pre class="sg-pre"><code>{componentUsageCode}</code></pre>
+            <p class="sg-caption">
+              The <code>class</code> prop lands on the root, and utilities win
+              over the component's CSS, so per-instance tweaks need nothing new.
+            </p>
+          </div>
+        </section>
+
+        <section class="sg-section" id="rules">
+          <p class="sg-eyebrow">Building</p>
+          <h2 class="sg-h2">Rules for the agent</h2>
+          <div class="sg-panel">
+            <ol class="sg-list">
+              {rules.map((r) => <li>{r}</li>)}
+            </ol>
+          </div>
+        </section>
+
+        <section class="sg-section" id="migration">
+          <p class="sg-eyebrow">Building</p>
+          <h2 class="sg-h2">From Client-First</h2>
+          <p class="sg-lede">
+            Names stay Client-First-flavored; the structure changes where a
+            code-first, agent-built project benefits.
+          </p>
+          <div class="sg-panel">
+            <div class="sg-tablewrap">
+              <table class="sg-table">
+                <thead><tr><th>Client-First</th><th>Sweet Work</th></tr></thead>
+                <tbody>
+                  {migration.map(([from, to]) => (
+                    <tr><td><code>{from}</code></td><td>{to}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="sg-frame-wrap" class="sg-framewrap" hidden>
+      <iframe
+        id="sg-frame"
+        class="sg-frame"
+        title="Class system preview at a narrower breakpoint"
+        loading="lazy"
+      />
+    </div>
+
+    <script>
+      import '../scripts/sg-chrome';
+    </script>
+  </div>
+</BaseLayout>

@@ -1,0 +1,107 @@
+/*
+  Cascade layers — the specificity order for the whole project, lowest
+  priority first:
+
+    reset       box-sizing, margin reset, media defaults
+    base        element defaults: body type/color, focus ring, skip link
+    layout      layout.css — section, container, grid, flex
+    components  every component's own <style>, wrapped in @layer components
+    utilities   utilities.css — spacing, type, color, visibility
+
+  A later layer always beats an earlier one, whatever the selector
+  specificity. So a utility class on an element wins over that
+  component's CSS, which wins over layout defaults, which win over base
+  element styles — no !important, no specificity fights. See CLAUDE.md
+  "Class system" → "Cascade layers".
+
+  The same order is also declared inline as the very first thing in
+  BaseLayout's <head>, so it's locked in before any stylesheet loads,
+  whatever order the bundler emits them in.
+
+  Styles outside any layer (the style guide's and /class-system's own
+  chrome) beat every layer — deliberately, so real tokens and utilities
+  can never restyle those tools.
+*/
+
+@layer reset, base, layout, components, utilities;
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  /* No default margins: spacing between elements comes from gap-* on the
+     parent (or margin-top-* / margin-bottom-*), never from browser
+     defaults that differ per element. */
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  figure,
+  blockquote,
+  dl,
+  dd {
+    margin: 0;
+  }
+
+  /* Images/media never overflow their containing block. */
+  img,
+  svg,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@layer base {
+  body {
+    color: var(--color-ink);
+    background: var(--color-bg);
+    font-family: var(--font-family-base);
+    font-size: var(--text-regular-size);
+    line-height: var(--text-regular-line-height);
+  }
+
+  /* Visible only for keyboard focus, not mouse clicks. */
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-accent);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* Skip-to-content link. Requires a matching landmark on every page —
+     <main id="main-content"> — see CLAUDE.md. */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: var(--space-small);
+    z-index: var(--z-index-skip-link);
+    padding: var(--space-xsmall) var(--space-medium);
+    border-radius: var(--radius-sm);
+    color: var(--color-white);
+    background: var(--color-primary);
+    text-decoration: none;
+  }
+
+  .skip-link:focus-visible {
+    top: var(--space-small);
+  }
+
+  /* !important inside a low layer beats !important in any higher layer,
+     so this can't be accidentally overridden by a component. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

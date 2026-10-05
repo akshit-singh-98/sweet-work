@@ -1,0 +1,837 @@
+/*
+  Utility layer — single-purpose classes for spacing, type, color, and
+  visibility. The top cascade layer (see base.css), so a utility on an
+  element always wins over the component's own CSS: adding
+  margin-top-large or hide-tablet to any instance just works.
+
+  Naming: {property}-{value}, one class per job — never two classes that
+  only work as a pair. Sizes come from ONE scale everywhere:
+    none · xxsmall · xsmall · small · medium · large · xlarge · xxlarge ·
+    huge · xhuge  (→ --space-* in tokens.css)
+  Breakpoint variants append -tablet / -mobile-landscape /
+  -mobile-portrait (values in breakpoints.css).
+
+  Every value is a var() into tokens.css. Before adding a class here, check
+  /class-system — the one you need almost certainly exists. If it doesn't,
+  extend an existing family (add a step) rather than inventing a new one;
+  see CLAUDE.md "Class system".
+*/
+
+@layer utilities {
+  /* ---- Gap ----
+     Space between grid/flex children — the default way to space
+     siblings. gap-* sets both directions; gap-row-* / gap-column-*
+     (declared after it) override one direction. */
+  .gap-none {
+    gap: 0;
+  }
+
+  .gap-xxsmall {
+    gap: var(--space-xxsmall);
+  }
+
+  .gap-xsmall {
+    gap: var(--space-xsmall);
+  }
+
+  .gap-small {
+    gap: var(--space-small);
+  }
+
+  .gap-medium {
+    gap: var(--space-medium);
+  }
+
+  .gap-large {
+    gap: var(--space-large);
+  }
+
+  .gap-xlarge {
+    gap: var(--space-xlarge);
+  }
+
+  .gap-xxlarge {
+    gap: var(--space-xxlarge);
+  }
+
+  .gap-huge {
+    gap: var(--space-huge);
+  }
+
+  .gap-xhuge {
+    gap: var(--space-xhuge);
+  }
+
+  .gap-row-none {
+    row-gap: 0;
+  }
+
+  .gap-row-xxsmall {
+    row-gap: var(--space-xxsmall);
+  }
+
+  .gap-row-xsmall {
+    row-gap: var(--space-xsmall);
+  }
+
+  .gap-row-small {
+    row-gap: var(--space-small);
+  }
+
+  .gap-row-medium {
+    row-gap: var(--space-medium);
+  }
+
+  .gap-row-large {
+    row-gap: var(--space-large);
+  }
+
+  .gap-row-xlarge {
+    row-gap: var(--space-xlarge);
+  }
+
+  .gap-row-xxlarge {
+    row-gap: var(--space-xxlarge);
+  }
+
+  .gap-row-huge {
+    row-gap: var(--space-huge);
+  }
+
+  .gap-row-xhuge {
+    row-gap: var(--space-xhuge);
+  }
+
+  .gap-column-none {
+    column-gap: 0;
+  }
+
+  .gap-column-xxsmall {
+    column-gap: var(--space-xxsmall);
+  }
+
+  .gap-column-xsmall {
+    column-gap: var(--space-xsmall);
+  }
+
+  .gap-column-small {
+    column-gap: var(--space-small);
+  }
+
+  .gap-column-medium {
+    column-gap: var(--space-medium);
+  }
+
+  .gap-column-large {
+    column-gap: var(--space-large);
+  }
+
+  .gap-column-xlarge {
+    column-gap: var(--space-xlarge);
+  }
+
+  .gap-column-xxlarge {
+    column-gap: var(--space-xxlarge);
+  }
+
+  .gap-column-huge {
+    column-gap: var(--space-huge);
+  }
+
+  .gap-column-xhuge {
+    column-gap: var(--space-xhuge);
+  }
+
+  /* ---- Margin ----
+     Vertical only, for the rare case gap can't handle (pulling one
+     element away from its siblings). Horizontal spacing is always gap. */
+  .margin-top-none {
+    margin-top: 0;
+  }
+
+  .margin-top-xxsmall {
+    margin-top: var(--space-xxsmall);
+  }
+
+  .margin-top-xsmall {
+    margin-top: var(--space-xsmall);
+  }
+
+  .margin-top-small {
+    margin-top: var(--space-small);
+  }
+
+  .margin-top-medium {
+    margin-top: var(--space-medium);
+  }
+
+  .margin-top-large {
+    margin-top: var(--space-large);
+  }
+
+  .margin-top-xlarge {
+    margin-top: var(--space-xlarge);
+  }
+
+  .margin-top-xxlarge {
+    margin-top: var(--space-xxlarge);
+  }
+
+  .margin-top-huge {
+    margin-top: var(--space-huge);
+  }
+
+  .margin-top-xhuge {
+    margin-top: var(--space-xhuge);
+  }
+
+  .margin-bottom-none {
+    margin-bottom: 0;
+  }
+
+  .margin-bottom-xxsmall {
+    margin-bottom: var(--space-xxsmall);
+  }
+
+  .margin-bottom-xsmall {
+    margin-bottom: var(--space-xsmall);
+  }
+
+  .margin-bottom-small {
+    margin-bottom: var(--space-small);
+  }
+
+  .margin-bottom-medium {
+    margin-bottom: var(--space-medium);
+  }
+
+  .margin-bottom-large {
+    margin-bottom: var(--space-large);
+  }
+
+  .margin-bottom-xlarge {
+    margin-bottom: var(--space-xlarge);
+  }
+
+  .margin-bottom-xxlarge {
+    margin-bottom: var(--space-xxlarge);
+  }
+
+  .margin-bottom-huge {
+    margin-bottom: var(--space-huge);
+  }
+
+  .margin-bottom-xhuge {
+    margin-bottom: var(--space-xhuge);
+  }
+
+  .margin-x-auto {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ---- Padding ----
+     Inner spacing on a box. padding-* = all sides, padding-x-* = left +
+     right, padding-y-* = top + bottom. Section padding is .section's job
+     (layout.css), not these. */
+  .padding-none {
+    padding: 0;
+  }
+
+  .padding-xxsmall {
+    padding: var(--space-xxsmall);
+  }
+
+  .padding-xsmall {
+    padding: var(--space-xsmall);
+  }
+
+  .padding-small {
+    padding: var(--space-small);
+  }
+
+  .padding-medium {
+    padding: var(--space-medium);
+  }
+
+  .padding-large {
+    padding: var(--space-large);
+  }
+
+  .padding-xlarge {
+    padding: var(--space-xlarge);
+  }
+
+  .padding-xxlarge {
+    padding: var(--space-xxlarge);
+  }
+
+  .padding-huge {
+    padding: var(--space-huge);
+  }
+
+  .padding-xhuge {
+    padding: var(--space-xhuge);
+  }
+
+  .padding-x-none {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .padding-x-xxsmall {
+    padding-left: var(--space-xxsmall);
+    padding-right: var(--space-xxsmall);
+  }
+
+  .padding-x-xsmall {
+    padding-left: var(--space-xsmall);
+    padding-right: var(--space-xsmall);
+  }
+
+  .padding-x-small {
+    padding-left: var(--space-small);
+    padding-right: var(--space-small);
+  }
+
+  .padding-x-medium {
+    padding-left: var(--space-medium);
+    padding-right: var(--space-medium);
+  }
+
+  .padding-x-large {
+    padding-left: var(--space-large);
+    padding-right: var(--space-large);
+  }
+
+  .padding-x-xlarge {
+    padding-left: var(--space-xlarge);
+    padding-right: var(--space-xlarge);
+  }
+
+  .padding-x-xxlarge {
+    padding-left: var(--space-xxlarge);
+    padding-right: var(--space-xxlarge);
+  }
+
+  .padding-x-huge {
+    padding-left: var(--space-huge);
+    padding-right: var(--space-huge);
+  }
+
+  .padding-x-xhuge {
+    padding-left: var(--space-xhuge);
+    padding-right: var(--space-xhuge);
+  }
+
+  .padding-y-none {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .padding-y-xxsmall {
+    padding-top: var(--space-xxsmall);
+    padding-bottom: var(--space-xxsmall);
+  }
+
+  .padding-y-xsmall {
+    padding-top: var(--space-xsmall);
+    padding-bottom: var(--space-xsmall);
+  }
+
+  .padding-y-small {
+    padding-top: var(--space-small);
+    padding-bottom: var(--space-small);
+  }
+
+  .padding-y-medium {
+    padding-top: var(--space-medium);
+    padding-bottom: var(--space-medium);
+  }
+
+  .padding-y-large {
+    padding-top: var(--space-large);
+    padding-bottom: var(--space-large);
+  }
+
+  .padding-y-xlarge {
+    padding-top: var(--space-xlarge);
+    padding-bottom: var(--space-xlarge);
+  }
+
+  .padding-y-xxlarge {
+    padding-top: var(--space-xxlarge);
+    padding-bottom: var(--space-xxlarge);
+  }
+
+  .padding-y-huge {
+    padding-top: var(--space-huge);
+    padding-bottom: var(--space-huge);
+  }
+
+  .padding-y-xhuge {
+    padding-top: var(--space-xhuge);
+    padding-bottom: var(--space-xhuge);
+  }
+
+  /* ---- Alignment ----
+     Mirrors the CSS property names exactly. Works on flex and grid. */
+  .align-items-start {
+    align-items: flex-start;
+  }
+
+  .align-items-center {
+    align-items: center;
+  }
+
+  .align-items-end {
+    align-items: flex-end;
+  }
+
+  .align-items-stretch {
+    align-items: stretch;
+  }
+
+  .align-items-baseline {
+    align-items: baseline;
+  }
+
+  .justify-content-start {
+    justify-content: flex-start;
+  }
+
+  .justify-content-center {
+    justify-content: center;
+  }
+
+  .justify-content-end {
+    justify-content: flex-end;
+  }
+
+  .justify-content-between {
+    justify-content: space-between;
+  }
+
+  .justify-content-around {
+    justify-content: space-around;
+  }
+
+  .align-self-start {
+    align-self: flex-start;
+  }
+
+  .align-self-center {
+    align-self: center;
+  }
+
+  .align-self-end {
+    align-self: flex-end;
+  }
+
+  .align-self-stretch {
+    align-self: stretch;
+  }
+
+  /* ---- Typography: heading style ----
+     Makes any element look like a heading level, independent of its
+     tag — an <h2> styled as heading-style-h4 keeps correct document
+     outline. Step 2 adds one class per Figma text style. */
+  .heading-style-h1 {
+    font-size: var(--text-h1-size);
+    font-weight: var(--text-h1-weight);
+    line-height: var(--text-h1-line-height);
+  }
+
+  .heading-style-h2 {
+    font-size: var(--text-h2-size);
+    font-weight: var(--text-h2-weight);
+    line-height: var(--text-h2-line-height);
+  }
+
+  .heading-style-h3 {
+    font-size: var(--text-h3-size);
+    font-weight: var(--text-h3-weight);
+    line-height: var(--text-h3-line-height);
+  }
+
+  .heading-style-h4 {
+    font-size: var(--text-h4-size);
+    font-weight: var(--text-h4-weight);
+    line-height: var(--text-h4-line-height);
+  }
+
+  .heading-style-h5 {
+    font-size: var(--text-h5-size);
+    font-weight: var(--text-h5-weight);
+    line-height: var(--text-h5-line-height);
+  }
+
+  .heading-style-h6 {
+    font-size: var(--text-h6-size);
+    font-weight: var(--text-h6-weight);
+    line-height: var(--text-h6-line-height);
+  }
+
+  /* ---- Typography: text size ---- */
+  .text-size-large {
+    font-size: var(--text-large-size);
+    font-weight: var(--text-large-weight);
+    line-height: var(--text-large-line-height);
+  }
+
+  .text-size-medium {
+    font-size: var(--text-medium-size);
+    font-weight: var(--text-medium-weight);
+    line-height: var(--text-medium-line-height);
+  }
+
+  .text-size-regular {
+    font-size: var(--text-regular-size);
+    font-weight: var(--text-regular-weight);
+    line-height: var(--text-regular-line-height);
+  }
+
+  .text-size-small {
+    font-size: var(--text-small-size);
+    font-weight: var(--text-small-weight);
+    line-height: var(--text-small-line-height);
+  }
+
+  .text-size-tiny {
+    font-size: var(--text-tiny-size);
+    font-weight: var(--text-tiny-weight);
+    line-height: var(--text-tiny-line-height);
+  }
+
+  /* ---- Typography: text weight ---- */
+  .text-weight-light {
+    font-weight: var(--font-weight-light);
+  }
+
+  .text-weight-normal {
+    font-weight: var(--font-weight-normal);
+  }
+
+  .text-weight-medium {
+    font-weight: var(--font-weight-medium);
+  }
+
+  .text-weight-semibold {
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .text-weight-bold {
+    font-weight: var(--font-weight-bold);
+  }
+
+  /* ---- Typography: text style ---- */
+  .text-style-allcaps {
+    text-transform: uppercase;
+  }
+
+  .text-style-italic {
+    font-style: italic;
+  }
+
+  .text-style-link {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+
+  .text-style-nowrap {
+    white-space: nowrap;
+  }
+
+  .text-style-balance {
+    text-wrap: balance;
+  }
+
+  .text-style-strikethrough {
+    text-decoration: line-through;
+  }
+
+  .text-style-2lines {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .text-style-3lines {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  /* ---- Typography: text alignment ---- */
+  .text-align-left {
+    text-align: left;
+  }
+
+  .text-align-center {
+    text-align: center;
+  }
+
+  .text-align-right {
+    text-align: right;
+  }
+
+  /* ---- Text color ----
+     Step 2 replaces this set with one class per real Figma text color. */
+  .text-color-primary {
+    color: var(--color-ink);
+  }
+
+  .text-color-secondary {
+    color: var(--color-secondary);
+  }
+
+  .text-color-alternate {
+    color: var(--color-alternate);
+  }
+
+  .text-color-accent {
+    color: var(--color-accent);
+  }
+
+  .text-color-white {
+    color: var(--color-white);
+  }
+
+  /* ---- Background color ----
+     Step 2 replaces this set with one class per real Figma surface color. */
+  .background-color-primary {
+    background-color: var(--color-bg);
+  }
+
+  .background-color-secondary {
+    background-color: var(--color-bg-secondary);
+  }
+
+  .background-color-tertiary {
+    background-color: var(--color-bg-tertiary);
+  }
+
+  .background-color-alternate {
+    background-color: var(--color-bg-alternate);
+  }
+
+  .background-color-alt {
+    background-color: var(--color-bg-alt);
+  }
+
+  /* ---- Radius ---- */
+  .radius-small {
+    border-radius: var(--radius-sm);
+  }
+
+  .radius-medium {
+    border-radius: var(--radius-md);
+  }
+
+  .radius-large {
+    border-radius: var(--radius-lg);
+  }
+
+  .radius-full {
+    border-radius: var(--radius-full);
+  }
+
+  /* ---- Max width ----
+     Limits an element inside a container (a text column, a centered
+     intro). Pair with margin-x-auto to center it. */
+  .max-width-xxsmall {
+    max-width: var(--max-width-xxsmall);
+  }
+
+  .max-width-xsmall {
+    max-width: var(--max-width-xsmall);
+  }
+
+  .max-width-small {
+    max-width: var(--max-width-small);
+  }
+
+  .max-width-medium {
+    max-width: var(--max-width-medium);
+  }
+
+  .max-width-large {
+    max-width: var(--max-width-large);
+  }
+
+  .max-width-xlarge {
+    max-width: var(--max-width-xlarge);
+  }
+
+  .max-width-xxlarge {
+    max-width: var(--max-width-xxlarge);
+  }
+
+  .max-width-full {
+    max-width: none;
+  }
+
+  /* ---- Icon size ---- */
+  .icon-1x1-small {
+    width: var(--icon-size-small);
+    height: var(--icon-size-small);
+  }
+
+  .icon-1x1-medium {
+    width: var(--icon-size-medium);
+    height: var(--icon-size-medium);
+  }
+
+  .icon-1x1-large {
+    width: var(--icon-size-large);
+    height: var(--icon-size-large);
+  }
+
+  .icon-height-small {
+    height: var(--icon-size-small);
+  }
+
+  .icon-height-medium {
+    height: var(--icon-size-medium);
+  }
+
+  .icon-height-large {
+    height: var(--icon-size-large);
+  }
+
+  /* ---- Media ----
+     image-fill: the real image in an image slot (see CLAUDE.md "Image
+     placeholders") — fills the wrapper like <ImagePlaceholder /> does, so
+     swapping one for the other never moves the layout. */
+  .aspect-ratio-square {
+    aspect-ratio: 1 / 1;
+  }
+
+  .aspect-ratio-portrait {
+    aspect-ratio: 2 / 3;
+  }
+
+  .aspect-ratio-landscape {
+    aspect-ratio: 3 / 2;
+  }
+
+  .aspect-ratio-widescreen {
+    aspect-ratio: 16 / 9;
+  }
+
+  .image-fill {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---- Position & overflow ----
+     layer = absolutely fills its nearest positioned parent. */
+  .position-relative {
+    position: relative;
+  }
+
+  .layer {
+    position: absolute;
+    inset: 0;
+  }
+
+  .z-index-1 {
+    z-index: var(--z-index-1);
+  }
+
+  .z-index-2 {
+    z-index: var(--z-index-2);
+  }
+
+  .overflow-hidden {
+    overflow: hidden;
+  }
+
+  .overflow-auto {
+    overflow: auto;
+  }
+
+  .pointer-events-none {
+    pointer-events: none;
+  }
+
+  /* ---- Visibility ----
+     hide removes an element for everyone; visually-hidden keeps it for
+     screen readers only. */
+  .hide {
+    display: none;
+  }
+
+  /* A 1px box (0.0625rem) is the standard screen-reader-only technique, not a design value. */
+  .visually-hidden {
+    position: absolute;
+    /* stylelint-disable-next-line scale-unlimited/declaration-strict-value */
+    width: 0.0625rem;
+    /* stylelint-disable-next-line scale-unlimited/declaration-strict-value */
+    height: 0.0625rem;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  /* ---- Responsive: tablet ---- */
+  @media (--tablet) {
+    .hide-tablet {
+      display: none;
+    }
+
+    .max-width-full-tablet {
+      max-width: none;
+    }
+
+    .text-align-left-tablet {
+      text-align: left;
+    }
+
+    .text-align-center-tablet {
+      text-align: center;
+    }
+  }
+
+  /* ---- Responsive: mobile landscape ---- */
+  @media (--mobile-landscape) {
+    .hide-mobile-landscape {
+      display: none;
+    }
+
+    .max-width-full-mobile-landscape {
+      max-width: none;
+    }
+
+    .text-align-left-mobile-landscape {
+      text-align: left;
+    }
+
+    .text-align-center-mobile-landscape {
+      text-align: center;
+    }
+  }
+
+  /* ---- Responsive: mobile portrait ---- */
+  @media (--mobile-portrait) {
+    .hide-mobile-portrait {
+      display: none;
+    }
+
+    .max-width-full-mobile-portrait {
+      max-width: none;
+    }
+
+    .text-align-left-mobile-portrait {
+      text-align: left;
+    }
+
+    .text-align-center-mobile-portrait {
+      text-align: center;
+    }
+  }
+}

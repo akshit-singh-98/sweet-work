@@ -1,0 +1,251 @@
+/*
+  Design tokens — TEMPLATE.
+
+  Everything in this file starts as a placeholder. Replace these values
+  with the real ones from your project's Figma file (via the
+  design-to-code tool — not screenshots, not guessing): first from its
+  style guide/variables in step 2 of the build order in CLAUDE.md, then
+  from every component and page frame after that. The token names stay;
+  the values bend to the design (CLAUDE.md → "The framework bends to the
+  design").
+
+  When a value is set from the design, note its source in a comment on
+  the same line, starting with "figma:" and naming the frame — e.g.
+  --space-large: 2rem, commented "figma: Homepage › Features grid gutter".
+  A token with no `figma:` comment is still a placeholder.
+
+  The one rule that doesn't change project to project: every color,
+  spacing value, font size, and radius used anywhere in this project must
+  reference something defined here (or a class in layout.css /
+  utilities.css that itself references one of these) — nothing gets hardcoded inline.
+  `npm run lint:css` enforces this.
+*/
+
+:root {
+  /* ---- Colors ----
+     Replace with your project's real palette. Keep names semantic
+     (--color-ink, --color-accent) rather than literal (--color-navy) so a
+     rebrand doesn't require renaming every reference. */
+  --color-primary: #1a1a1a;
+  --color-secondary: #4a4a4a;
+  --color-accent: #2563eb;
+  --color-ink: #1a1a1a;      /* default text color */
+  --color-bg: #fff;       /* default page background */
+  --color-bg-alt: #f5f5f5;   /* secondary background, e.g. alternating sections */
+  --color-white: #fff;
+  --color-black: #000;
+
+  /* ---- Typography ----
+     Replace the family and confirm every size/weight/line-height against
+     Figma's real text styles — don't assume this scale matches. */
+  --font-family-base: 'Inter', system-ui, sans-serif;
+  --text-h1-size: 4rem;
+  --text-h1-weight: 700;
+  --text-h1-line-height: 1.1;
+  --text-h2-size: 3rem;
+  --text-h2-weight: 700;
+  --text-h2-line-height: 1.15;
+  --text-h3-size: 2rem;
+  --text-h3-weight: 600;
+  --text-h3-line-height: 1.2;
+  --text-h4-size: 1.5rem;
+  --text-h4-weight: 600;
+  --text-h4-line-height: 1.25;
+  --text-medium-size: 1.125rem;
+  --text-medium-weight: 400;
+  --text-medium-line-height: 1.5;
+  --text-small-size: 0.875rem;
+  --text-small-weight: 400;
+  --text-small-line-height: 1.4;
+
+  /* ---- Spacing scale ----
+     ONE scale for everything: gap-*, margin-*, padding-* utilities and
+     component CSS all read these same steps (see utilities.css). The
+     names are fixed; the values are Figma's — re-value placeholder steps
+     as designs arrive, and add a step only between confirmed ones (see
+     CLAUDE.md "The framework bends to the design"). Values below are a
+     base-8 placeholder. */
+  --space-xxsmall: 0.25rem;
+  --space-xsmall: 0.5rem;
+  --space-small: 1rem;
+  --space-medium: 1.5rem;
+  --space-large: 2rem;
+  --space-xlarge: 3rem;
+  --space-xxlarge: 4rem;
+  --space-huge: 6rem;
+  --space-xhuge: 8rem;
+
+  /* ---- Section rhythm ----
+     Vertical padding for .section (see layout.css). Separate from the
+     spacing scale above because Figma sections usually settle on a few
+     values of their own (e.g. 48 / 80 / 120) that don't line up with the
+     component-level steps. .section defaults to medium. */
+  --section-space-small: 3rem;
+  --section-space-medium: 5rem;
+  --section-space-large: 7.5rem;
+  --section-space-xlarge: 10rem;
+
+  /* ---- Page edge + containers ----
+     --padding-global is the horizontal page gutter every .section (and
+     .padding-global) applies, so content never touches the viewport edge. */
+  --padding-global: 1.5rem;
+  --container-small: 40rem;
+  --container-medium: 60rem;
+  --container-large: 80rem;
+
+  /* ---- Auto-fit grid minimums ----
+     Minimum column width for grid-auto-small/medium/large: the grid fits
+     as many columns as it can and wraps on its own, no breakpoints needed. */
+  --grid-min-small: 12rem;
+  --grid-min-medium: 16rem;
+  --grid-min-large: 22rem;
+
+  /* ---- Radius ---- */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-full: 999rem;
+
+  /* ---- Additional background/text color variants ----
+     Placeholders, same as every other color in this file — replace with
+     real values pulled from Figma. */
+  --color-alternate: #7c3aed;
+  --color-bg-secondary: #eef1f5;
+  --color-bg-tertiary: #e4e4e7;
+  --color-bg-alternate: #fef3e8;
+
+  /* ---- Font weights (text-weight-*) ---- */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ---- Extended type scale ----
+     h5/h6 fill out heading-style-h1..h6; large/regular/small/tiny round
+     out the text-size-* scale alongside medium above. */
+  --text-h5-size: 1.25rem;
+  --text-h5-weight: 600;
+  --text-h5-line-height: 1.3;
+  --text-h6-size: 1rem;
+  --text-h6-weight: 600;
+  --text-h6-line-height: 1.4;
+  --text-large-size: 1.25rem;
+  --text-large-weight: 400;
+  --text-large-line-height: 1.5;
+  --text-regular-size: 1rem;
+  --text-regular-weight: 400;
+  --text-regular-line-height: 1.5;
+  --text-tiny-size: 0.75rem;
+  --text-tiny-weight: 400;
+  --text-tiny-line-height: 1.3;
+
+  /* ---- Max-width scale (max-width-*) ----
+     For limiting an element *inside* a container — a text column, a
+     centered intro. The container-* scale above is for a section's outer
+     content width. */
+  --max-width-xxlarge: 80rem;
+  --max-width-xlarge: 64rem;
+  --max-width-large: 48rem;
+  --max-width-medium: 32rem;
+  --max-width-small: 20rem;
+  --max-width-xsmall: 16rem;
+  --max-width-xxsmall: 12rem;
+
+  /* ---- Icon sizes (icon-1x1-* / icon-height-*) ---- */
+  --icon-size-small: 1rem;
+  --icon-size-medium: 1.5rem;
+  --icon-size-large: 2rem;
+
+  /* ---- Image placeholder icon (<ImagePlaceholder />) ----
+     The icon scales with the slot (20% of its width) between these caps. */
+  --image-placeholder-icon-min: 1.5rem;
+  --image-placeholder-icon-max: 4rem;
+
+  /* ---- Stacking (z-index-*) ----
+     Every z-index reads one of these, so stacking order is decided in one
+     place instead of escalating numbers across components. */
+  --z-index-1: 1;
+  --z-index-2: 2;
+  --z-index-skip-link: 9999;
+
+  /* ---- Accessibility ---- */
+  --focus-ring-width: 0.125rem;
+  --focus-ring-offset: 0.125rem;
+}
+
+/* ---- Responsive scale ----
+   Redefines the *tokens themselves* at tablet/mobile — the code-equivalent
+   of overriding a style per-breakpoint on Webflow's canvas. Every heading
+   style, utility class, and component that already reads these custom
+   properties gets the smaller value for free; nothing downstream needs a
+   responsive variant of its own. A one-off exception (this one H2 needs
+   1.5rem, not the scale's 2rem) still gets a local override in that
+   component's own scoped CSS — same escape valve Client-First itself
+   documents for spacing exceptions, just expressed as a token override
+   instead of a custom class.
+
+   Breakpoints come from breakpoints.css (tablet
+   ≤61.9375rem, mobile ≤47.9375rem — "mobile" here means the mobile-landscape cutoff;
+   there's no separate mobile-portrait tier for tokens, three steps is
+   plenty). Source order matters: mobile is declared after tablet so it
+   wins at narrow widths where both conditions are simultaneously true.
+
+   Every value below is a PLACEHOLDER scaling ratio, same status as the
+   base scale above — confirm against real tablet/mobile Figma frames
+   before treating these as final, don't assume the ratio holds.
+
+   Deliberately NOT made responsive, with reasons:
+     --text-regular/-small/-tiny-size        → body copy shouldn't shrink
+                                                below ~1rem for legibility
+     --space-xxsmall … --space-medium        → small gaps are already tight
+     --radius-*                              → radius isn't breakpoint-
+                                                dependent in most systems
+     --icon-size-*                           → icons stay a consistent,
+                                                predictable touch target
+     --container-* and --max-width-* tokens  → these are caps, not sizes;
+                                                a max-width simply stops
+                                                constraining below its own
+                                                value, nothing to shrink
+     --font-weight-*, colors                 → not size-related */
+
+@media (--tablet) {
+  :root {
+    --text-h1-size: 3rem;
+    --text-h2-size: 2.25rem;
+    --text-h3-size: 1.75rem;
+    --text-h4-size: 1.375rem;
+    --text-large-size: 1.125rem;
+    --space-xlarge: 2.5rem;
+    --space-xxlarge: 3rem;
+    --space-huge: 4.5rem;
+    --space-xhuge: 6rem;
+    --section-space-small: 2.5rem;
+    --section-space-medium: 4rem;
+    --section-space-large: 6rem;
+    --section-space-xlarge: 7.5rem;
+    --padding-global: 1.25rem;
+  }
+}
+
+@media (--mobile-landscape) {
+  :root {
+    --text-h1-size: 2.25rem;
+    --text-h2-size: 1.75rem;
+    --text-h3-size: 1.5rem;
+    --text-h4-size: 1.25rem;
+    --text-h5-size: 1.125rem;
+    --text-large-size: 1rem;
+    --text-medium-size: 1rem;
+    --space-large: 1.5rem;
+    --space-xlarge: 2rem;
+    --space-xxlarge: 2.5rem;
+    --space-huge: 3.5rem;
+    --space-xhuge: 4.5rem;
+    --section-space-small: 2rem;
+    --section-space-medium: 3rem;
+    --section-space-large: 4rem;
+    --section-space-xlarge: 5rem;
+    --padding-global: 1rem;
+  }
+}

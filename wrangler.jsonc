@@ -1,0 +1,13 @@
+// Cloudflare Workers deploy config. The site builds to static files
+// (no adapter — see astro.config.mjs), so the Worker only serves the
+// contents of dist/. Having this file also stops `wrangler deploy` from
+// running its automatic project setup during Cloudflare builds.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Must match the Worker's name in the Cloudflare dashboard.
+  "name": "sweet-work",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}

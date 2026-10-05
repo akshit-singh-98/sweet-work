@@ -1,0 +1,56 @@
+/*
+  Styles for the placeholder homepage (src/pages/index.astro) ONLY — NOT
+  part of the tokens.css / utilities.css / base.css system, and never
+  imported by BaseLayout.
+
+  The placeholder homepage introduces Sweet Work itself and is thrown away
+  once the real homepage is built. Until then it has to stay readable no
+  matter what lands in tokens.css — pulling a real Figma palette or type
+  scale in at build-order step 2 must not repaint or resize this page. So,
+  same rule as src/styles/style-guide.css: every value below is a fixed
+  constant, never a var() into tokens.css.
+
+  When the real homepage replaces index.astro, delete this file too.
+*/
+
+.home {
+  --home-font-family: -apple-system, blinkmacsystemfont, 'Segoe UI', system-ui, sans-serif;
+  --home-mono-family: ui-monospace, sfmono-regular, menlo, consolas, monospace;
+  --home-ink: #1a1a1a;
+  --home-secondary: #5b6270;
+  --home-accent: #2563eb;
+  --home-accent-ink: #fff;
+  --home-bg: #fff;
+  --home-bg-alt: #f5f5f6;
+  --home-tip-bg: #eff4ff;
+  --home-border: #e2e4e9;
+  --home-text-display: 3.5rem;
+  --home-text-display-mobile: 2.5rem;
+  --home-text-h2: 1.75rem;
+  --home-text-phase: 1.375rem;
+  --home-text-h3: 1.125rem;
+  --home-text-lg: 1.25rem;
+  --home-text-body: 1rem;
+  --home-text-sm: 0.875rem;
+  --home-text-xs: 0.75rem;
+  --home-weight-regular: 400;
+  --home-weight-bold: 700;
+  --home-weight-semibold: 600;
+  --home-leading-tight: 1.1;
+  --home-leading-snug: 1.3;
+  --home-leading-normal: 1.55;
+  --home-space-2xs: 0.25rem;
+  --home-space-xs: 0.5rem;
+  --home-space-sm: 1rem;
+  --home-space-md: 1.5rem;
+  --home-space-lg: 3rem;
+  --home-space-xl: 5rem;
+  --home-radius: 0.5rem;
+  --home-radius-pill: 999rem;
+  --home-max-width: 63.25rem;
+  --home-measure: 68ch;
+  --home-tracking-wide: 0.08em;
+  --home-tracking-tight: -0.02em;
+  --home-step-num-size: 2rem;
+  --home-outline: inset 0 0 0 0.0625rem var(--home-border);
+}

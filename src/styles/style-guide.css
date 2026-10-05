@@ -1,0 +1,714 @@
+/*
+  Chrome-only styles for src/pages/style-guide.astro — NOT part of the
+  tokens.css / utilities.css system, and never imported by BaseLayout.
+
+  The style guide's job is to preview this project's real tokens,
+  utilities, and components. If its own furniture (nav, panels, titlebar,
+  headings, captions, code snippets) read those same tokens, importing a
+  real Figma palette would repaint the tool along with the site — and a
+  real palette is free to contain things like light text meant for dark
+  surfaces, or a dark "alt background" value, which is exactly what broke
+  this page once real colors replaced the placeholders (light-grey text
+  turned unreadable, panel backgrounds turned dark blue with dark text
+  still on top). See CLAUDE.md's "Style guide chrome is independent"
+  section for the full rule.
+
+  Every value below is a fixed, hardcoded constant — never a var() into
+  tokens.css. Do not "fix" a future style guide bug by pointing these back
+  at real tokens; that reintroduces the exact problem this file exists to
+  prevent.
+
+  The only parts of style-guide.astro that SHOULD read real tokens or
+  utility classes are the elements explicitly demonstrating one — a color
+  swatch's fill, a heading rendered with heading-style-h2, a spacing bar's
+  width, a live component preview. Those stay wired to the real system on
+  purpose; everything else (labels, panels, nav, headings that just title
+  a section) uses the variables defined here instead.
+*/
+
+.sg {
+  --sg-font-family: -apple-system, blinkmacsystemfont, 'Segoe UI', system-ui, sans-serif;
+  --sg-ink: #1a1a1a;
+  --sg-secondary: #6b7280;
+  --sg-accent: #2563eb;
+  --sg-bg: #fff;
+  --sg-bg-alt: #f5f5f6;
+  --sg-bg-tertiary: #e5e7eb;
+  --sg-border: #e2e4e9;
+  --sg-white: #fff;
+
+  /* Chrome type scale — fixed sizes/weights/line-heights, same rule as the
+     colors above. `npm run lint:css` requires font-size/font-weight/
+     line-height to reference *some* custom property; these are that
+     property, kept separate from tokens.css's real --text-* and
+     --font-weight-* scales on purpose. */
+  --sg-text-h1: 2.5rem;
+  --sg-text-h2: 1.625rem;
+  --sg-text-lg: 1.125rem;
+  --sg-text-body: 1rem;
+  --sg-text-sm: 0.875rem;
+  --sg-text-xs: 0.75rem;
+  --sg-text-code: 0.85em;
+  --sg-weight-regular: 400;
+  --sg-weight-bold: 700;
+  --sg-weight-semibold: 600;
+  --sg-leading-tight: 1.15;
+  --sg-leading-snug: 1.2;
+  --sg-leading-normal: 1.5;
+  --sg-leading-caption: 1.4;
+
+  /* Chrome spacing + radius — fixed, same rule again. The style guide's
+     panels, gaps, and page gutter must not grow or shrink when real
+     spacing/radius tokens come in from Figma. Only the spacing bars and
+     radius swatches (inline styles in style-guide.astro) read the real
+     --space-* / --radius-* tokens, because previewing them is the point. */
+  --sg-space-2xs: 0.5rem;
+  --sg-space-xs: 1rem;
+  --sg-space-sm: 1.5rem;
+  --sg-space-md: 2rem;
+  --sg-space-lg: 3rem;
+  --sg-space-xl: 4rem;
+  --sg-space-2xl: 6rem;
+  --sg-space-3xl: 8rem;
+  --sg-gutter: 1.5rem;
+  --sg-dot-size: 0.5rem;
+  --sg-code-pad-y: 0.125rem;
+  --sg-code-pad-x: 0.25rem;
+  --sg-radius-sm: 0.25rem;
+  --sg-radius-md: 0.5rem;
+  --sg-radius-lg: 1rem;
+  --sg-radius-full: 999rem;
+  --sg-tracking-wide: 0.08em;
+  --sg-tracking-snug: 0.04em;
+  --sg-swatch-width: 10rem;
+  --sg-swatch-height: 5rem;
+  --sg-label-width: 10rem;
+  --sg-bar-height: 1rem;
+  --sg-cell-min-height: var(--sg-cell-min-height);
+  --sg-cell-tall-min-height: var(--sg-cell-tall-min-height);
+  --sg-frame-max-height: var(--sg-frame-max-height);
+
+  /* Note/flag callout — for open questions and design inconsistencies left
+     inline in the style guide (see CLAUDE.md's "Handling design
+     inconsistencies"). Deliberately red regardless of the project's real
+     accent/error colors, so a flag always reads as "needs a human," never
+     blends in, and never disappears if the real palette happens to be
+     red-heavy. */
+  --sg-note-text: #b91c1c;
+  --sg-note-bg: #fef2f2;
+  --sg-note-border: #fecaca;
+
+  /* /class-system demo chrome */
+  --sg-code-bg: #0f172a;
+  --sg-code-ink: #e2e8f0;
+  --sg-code-comment: #94a3b8;
+  --sg-demo-bg: #eff6ff;
+  --sg-demo-border: #93c5fd;
+  --sg-demo-ink: #1e3a8a;
+  --sg-cell-bg: #dbeafe;
+  --sg-layer-1: #f1f5f9;
+  --sg-layer-2: #e2e8f0;
+  --sg-layer-3: #dbeafe;
+  --sg-layer-4: #bfdbfe;
+  --sg-layer-5: #93c5fd;
+  --sg-mono-family: ui-monospace, sfmono-regular, menlo, consolas, monospace;
+}
+
+/* Breakpoint literals match the canonical three in utilities.css. */
+@media (width <= 61.9375rem) {
+  .sg {
+    --sg-gutter: 1.25rem;
+  }
+}
+
+@media (width <= 47.9375rem) {
+  .sg {
+    --sg-gutter: 1rem;
+  }
+}
+
+/* ==== Chrome classes ====
+   Shared by /style-guide and /class-system. Unlayered on purpose: unlayered
+   CSS beats every cascade layer (see base.css), so nothing in the real
+   system can restyle this chrome. */
+
+/* The project's reset (base.css) zeroes element margins. That's part of
+   the real system, so the style guide opts back out: restore browser
+   default margins inside .sg. Declared first so every explicit chrome
+   margin below still wins. */
+.sg :where(h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd) {
+  margin-block: revert;
+}
+
+/* Chrome typography — fixed values, not tokens.css (see the top of this
+   file): this page's own furniture must survive any real palette. */
+.sg-root {
+  color: var(--sg-ink);
+  background: var(--sg-bg);
+  font-family: var(--sg-font-family);
+}
+
+.sg-h1 {
+  font-size: var(--sg-text-h1);
+  font-weight: var(--sg-weight-bold);
+  line-height: var(--sg-leading-tight);
+  color: var(--sg-ink);
+}
+
+.sg-h2 {
+  font-size: var(--sg-text-h2);
+  font-weight: var(--sg-weight-bold);
+  line-height: var(--sg-leading-snug);
+  color: var(--sg-ink);
+}
+
+.sg-lede {
+  font-size: var(--sg-text-body);
+  line-height: var(--sg-leading-normal);
+  color: var(--sg-secondary);
+}
+
+.sg-caption {
+  font-size: var(--sg-text-xs);
+  line-height: var(--sg-leading-caption);
+  color: var(--sg-secondary);
+}
+
+.sg-tokenval {
+  color: var(--sg-secondary);
+}
+
+/* Font-size-only stand-in for text-size-medium, used where a demo element
+   (a text-color-*, text-style-*, or text-weight-* utility) needs a
+   consistent chrome size around it without also inheriting a chrome
+   color — the utility's own color, if any, must still win. */
+.sg-demo-text {
+  font-size: var(--sg-text-body);
+  line-height: var(--sg-leading-normal);
+}
+
+.sg-titlebar {
+  display: flex;
+  align-items: center;
+  gap: var(--sg-space-2xs);
+  padding: var(--sg-space-xs) var(--sg-gutter);
+  color: var(--sg-white);
+  background: var(--sg-ink);
+}
+
+.sg-titlebar__name {
+  font-size: var(--sg-text-lg);
+  font-weight: var(--sg-weight-semibold);
+  color: var(--sg-white);
+  text-decoration: none;
+}
+
+.sg-titlebar__name:hover {
+  text-decoration: underline;
+}
+
+.sg-titlebar__divider {
+  opacity: 0.4;
+}
+
+.sg-titlebar__nav {
+  display: flex;
+  gap: var(--sg-space-xs);
+}
+
+.sg-titlebar__link {
+  color: var(--sg-white);
+  text-decoration: none;
+  opacity: 0.7;
+}
+
+.sg-titlebar__link:hover {
+  text-decoration: underline;
+  opacity: 1;
+}
+
+.sg-titlebar__link[aria-current="page"] {
+  font-weight: var(--sg-weight-semibold);
+  opacity: 1;
+}
+
+.sg-bpbar[hidden] {
+  display: none;
+}
+
+.sg-bpbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sg-space-sm);
+  padding: var(--sg-space-xs) var(--sg-gutter);
+  border-bottom: 0.0625rem solid var(--sg-border);
+  background: var(--sg-bg-alt);
+}
+
+.sg-bpbar__label {
+  font-size: var(--sg-text-xs);
+  font-weight: var(--sg-weight-semibold);
+  letter-spacing: var(--sg-tracking-wide);
+  color: var(--sg-secondary);
+  text-transform: uppercase;
+}
+
+.sg-bpbar__hint {
+  font-size: var(--sg-text-xs);
+  line-height: var(--sg-leading-caption);
+  color: var(--sg-secondary);
+}
+
+.sg-bptoggle {
+  display: inline-flex;
+  gap: var(--sg-space-2xs);
+}
+
+.sg-bpbtn {
+  padding: var(--sg-space-2xs) var(--sg-space-sm);
+  border: 0.0625rem solid var(--sg-border);
+  border-radius: var(--sg-radius-sm);
+  background: var(--sg-bg);
+  color: var(--sg-ink);
+  font-family: var(--sg-font-family);
+  font-size: var(--sg-text-sm);
+  cursor: pointer;
+}
+
+.sg-bpbtn[aria-pressed='true'] {
+  border-color: var(--sg-accent);
+  color: var(--sg-white);
+  background: var(--sg-accent);
+}
+
+.sg-framewrap[hidden] {
+  display: none;
+}
+
+.sg-framewrap {
+  display: flex;
+  justify-content: center;
+  padding: var(--sg-space-lg) var(--sg-gutter);
+  background: var(--sg-bg-alt);
+}
+
+.sg-frame {
+  height: 80vh;
+  max-height: var(--sg-frame-max-height);
+  border: 0.0625rem solid var(--sg-border);
+  border-radius: var(--sg-radius-md);
+  background: var(--sg-bg);
+}
+
+.sg-shell[hidden] {
+  display: none;
+}
+
+.sg-shell {
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  align-items: start;
+  gap: var(--sg-space-xl);
+}
+
+.sg-sidebar {
+  position: sticky;
+  top: var(--sg-space-md);
+  padding: var(--sg-space-lg) 0 var(--sg-space-lg) var(--sg-gutter);
+}
+
+code {
+  padding: var(--sg-code-pad-y) var(--sg-code-pad-x);
+  border: 0.0625rem solid var(--sg-border);
+  border-radius: var(--sg-radius-sm);
+  background: var(--sg-bg-alt);
+  color: var(--sg-ink);
+  font-weight: var(--sg-weight-semibold);
+  font-size: var(--sg-text-code);
+}
+
+.sg-eyebrow {
+  margin-top: var(--sg-space-md);
+  margin-bottom: var(--sg-space-2xs);
+  font-size: var(--sg-text-xs);
+  font-weight: var(--sg-weight-semibold);
+  letter-spacing: var(--sg-tracking-wide);
+  color: var(--sg-secondary);
+  text-transform: uppercase;
+}
+
+.sg-navlist {
+  margin: 0 0 var(--sg-space-sm);
+  padding: 0;
+  list-style: none;
+}
+
+.sg-navlist li {
+  margin-bottom: var(--sg-space-2xs);
+}
+
+.sg-navlist a {
+  color: var(--sg-ink);
+  font-size: var(--sg-text-sm);
+  text-decoration: none;
+}
+
+.sg-navlist a:hover {
+  color: var(--sg-accent);
+}
+
+.sg-content {
+  min-width: 0;
+  padding: var(--sg-space-lg) var(--sg-gutter) var(--sg-space-3xl) 0;
+}
+
+.sg-intro {
+  margin-bottom: var(--sg-space-2xl);
+}
+
+.sg-section {
+  margin-top: var(--sg-space-2xl);
+  scroll-margin-top: var(--sg-space-md);
+}
+
+.sg-panel {
+  margin-top: var(--sg-space-md);
+  padding: var(--sg-space-md);
+  border: 0.0625rem solid var(--sg-border);
+  border-radius: var(--sg-radius-md);
+  background: var(--sg-bg-alt);
+}
+
+.sg-panel__header {
+  display: flex;
+  align-items: center;
+  gap: var(--sg-space-2xs);
+  margin: 0 0 var(--sg-space-sm);
+  font-size: var(--sg-text-xs);
+  font-weight: var(--sg-weight-semibold);
+  letter-spacing: var(--sg-tracking-wide);
+  color: var(--sg-accent);
+  text-transform: uppercase;
+}
+
+.sg-dot {
+  width: var(--sg-dot-size);
+  height: var(--sg-dot-size);
+  border-radius: var(--sg-radius-full);
+  background: var(--sg-accent);
+}
+
+.sg-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sg-space-sm);
+}
+
+.sg-swatch {
+  width: var(--sg-swatch-width);
+}
+
+.sg-swatch__color {
+  width: 100%;
+  height: var(--sg-swatch-height);
+  margin-bottom: var(--sg-space-2xs);
+  border: 0.0625rem solid var(--sg-border);
+  border-radius: var(--sg-radius-sm);
+}
+
+.sg-swatch__color--radius {
+  background: var(--sg-bg-alt);
+  border: 0.0625rem solid var(--sg-border);
+}
+
+.sg-swatch__name {
+  margin: 0;
+  font-size: var(--sg-text-sm);
+  font-weight: var(--sg-weight-semibold);
+  color: var(--sg-ink);
+}
+
+.sg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sg-space-sm);
+}
+
+.sg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sg-space-2xs);
+}
+
+.sg-stack p {
+  margin: 0 0 var(--sg-space-2xs);
+}
+
+.sg-spacing__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sg-space-sm);
+  margin-bottom: var(--sg-space-2xs);
+}
+
+.sg-spacing__label {
+  width: var(--sg-label-width);
+  font-size: var(--sg-text-sm);
+}
+
+.sg-spacing__bar {
+  height: var(--sg-bar-height);
+  background: var(--sg-accent);
+}
+
+
+/* Note/flag callout — always red, regardless of the real palette. See
+   style-guide.css for why these colors are independent. Use this
+   whenever flagging a design inconsistency directly in the page (in
+   addition to logging it in COMPONENT_INVENTORY.md — see CLAUDE.md's
+   "Handling design inconsistencies"). */
+.sg-link {
+  color: var(--sg-accent);
+  text-decoration: underline;
+}
+
+.sg-note {
+  margin-top: var(--sg-space-sm);
+  padding: var(--sg-space-sm);
+  border: 0.0625rem solid var(--sg-note-border);
+  border-radius: var(--sg-radius-sm);
+  color: var(--sg-note-text);
+  background: var(--sg-note-bg);
+}
+
+.sg-note__label {
+  margin: 0 0 var(--sg-space-2xs);
+  font-size: var(--sg-text-xs);
+  font-weight: var(--sg-weight-bold);
+  letter-spacing: var(--sg-tracking-wide);
+  text-transform: uppercase;
+}
+
+.sg-container-demo {
+  padding: var(--sg-space-sm) 0;
+  border-bottom: 0.0625rem solid var(--sg-border);
+}
+
+.sg-container-demo:last-child {
+  border-bottom: none;
+}
+
+.sg-container-demo__box {
+  padding: var(--sg-space-xs);
+  border: 0.0625rem dashed var(--sg-accent);
+  border-radius: var(--sg-radius-sm);
+  background: var(--sg-bg);
+}
+
+
+
+@media (width <= 47.9375rem) {
+  .sg-titlebar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sg-space-2xs);
+  }
+
+  .sg-titlebar__divider {
+    display: none;
+  }
+
+  .sg-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sg-sidebar {
+    position: static;
+    padding: var(--sg-space-md) var(--sg-gutter) 0;
+  }
+
+  .sg-content {
+    padding: var(--sg-space-lg) var(--sg-gutter) var(--sg-space-2xl);
+  }
+}
+
+/* ==== /class-system demo chrome ====
+   Demo wrappers here set ONLY background, border, radius, and type — never
+   display, gap, padding, margin, or width — because they often sit on the
+   same element as the real class being demonstrated, and unlayered chrome
+   would override it. Padding, when a demo needs breathing room, comes from
+   an outer .sg-demo-frame. */
+
+.sg-demo-frame {
+  padding: var(--sg-space-xs);
+  border: 0.0625rem solid var(--sg-border);
+  border-radius: var(--sg-radius-md);
+  background: var(--sg-bg);
+}
+
+.sg-demo-frame + .sg-demo-frame,
+.sg-demo-frame + .sg-caption {
+  margin-top: var(--sg-space-2xs);
+}
+
+.sg-demo-label {
+  margin: 0 0 var(--sg-space-2xs);
+  color: var(--sg-secondary);
+  font-family: var(--sg-mono-family);
+  font-size: var(--sg-text-xs);
+}
+
+.sg-demo {
+  border: 0.0625rem dashed var(--sg-demo-border);
+  border-radius: var(--sg-radius-sm);
+  background: var(--sg-demo-bg);
+}
+
+.sg-cell {
+  min-height: var(--sg-cell-min-height);
+  padding: var(--sg-space-2xs);
+  border-radius: var(--sg-radius-sm);
+  color: var(--sg-demo-ink);
+  background: var(--sg-cell-bg);
+  font-family: var(--sg-mono-family);
+  font-size: var(--sg-text-xs);
+  line-height: var(--sg-leading-normal);
+  text-align: center;
+}
+
+.sg-cell-tall {
+  min-height: var(--sg-cell-tall-min-height);
+}
+
+.sg-demo-section {
+  border: 0.0625rem dashed var(--sg-demo-border);
+  background: var(--sg-demo-bg);
+}
+
+.sg-demo-container {
+  border: 0.0625rem dashed var(--sg-demo-ink);
+  background: var(--sg-bg);
+}
+
+.sg-pre {
+  margin: 0;
+  padding: var(--sg-space-xs);
+  overflow-x: auto;
+  border-radius: var(--sg-radius-md);
+  color: var(--sg-code-ink);
+  background: var(--sg-code-bg);
+  font-family: var(--sg-mono-family);
+  font-size: var(--sg-text-sm);
+  line-height: var(--sg-leading-normal);
+  white-space: pre;
+}
+
+.sg-pre code {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: none;
+  font-weight: var(--sg-weight-regular);
+  font-size: inherit;
+}
+
+.sg-pre-comment {
+  color: var(--sg-code-comment);
+}
+
+.sg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--sg-text-sm);
+}
+
+.sg-table th,
+.sg-table td {
+  padding: var(--sg-space-2xs) var(--sg-space-xs) var(--sg-space-2xs) 0;
+  border-bottom: 0.0625rem solid var(--sg-border);
+  line-height: var(--sg-leading-caption);
+  text-align: left;
+  vertical-align: top;
+}
+
+.sg-table th {
+  color: var(--sg-secondary);
+  font-size: var(--sg-text-xs);
+  font-weight: var(--sg-weight-semibold);
+  letter-spacing: var(--sg-tracking-snug);
+  text-transform: uppercase;
+}
+
+.sg-tablewrap {
+  overflow-x: auto;
+}
+
+.sg-layers {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--sg-space-2xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sg-layer {
+  display: grid;
+  grid-template-columns: 8.75rem 1fr;
+  gap: var(--sg-space-xs);
+  align-items: baseline;
+  padding: var(--sg-space-2xs) var(--sg-space-xs);
+  border-radius: var(--sg-radius-sm);
+  font-size: var(--sg-text-sm);
+}
+
+.sg-layer:nth-child(1) { background: var(--sg-layer-1); }
+.sg-layer:nth-child(2) { background: var(--sg-layer-2); }
+.sg-layer:nth-child(3) { background: var(--sg-layer-3); }
+.sg-layer:nth-child(4) { background: var(--sg-layer-4); }
+.sg-layer:nth-child(5) { background: var(--sg-layer-5); }
+
+.sg-layer__name {
+  font-family: var(--sg-mono-family);
+  font-weight: var(--sg-weight-bold);
+}
+
+.sg-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sg-space-sm);
+}
+
+/* Grid items default to min-width: auto, so a wide code block would
+   force its column (and the page) wider than the viewport. */
+.sg-cols > * {
+  min-width: 0;
+}
+
+/* Long class names like section-bottom-{none|small|…} wrap instead of
+   pushing the table off-screen. */
+.sg-table code {
+  overflow-wrap: anywhere;
+}
+
+.sg-list {
+  margin: 0;
+  padding-left: var(--sg-space-sm);
+  line-height: var(--sg-leading-normal);
+}
+
+.sg-list li + li {
+  margin-top: var(--sg-space-2xs);
+}
+
+@media (width <= 47.9375rem) {
+  .sg-cols {
+    grid-template-columns: 1fr;
+  }
+
+  .sg-layer {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

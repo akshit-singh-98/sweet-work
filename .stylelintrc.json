@@ -1,0 +1,94 @@
+{
+  "extends": [
+    "stylelint-config-standard"
+  ],
+  "plugins": [
+    "stylelint-declaration-strict-value"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "**/*.astro"
+      ],
+      "customSyntax": "postcss-html"
+    },
+    {
+      "files": [
+        "src/styles/style-guide.css",
+        "src/styles/home.css",
+        "src/pages/index.astro",
+        "src/pages/style-guide.astro",
+        "src/pages/class-system.astro"
+      ],
+      "rules": {
+        "media-feature-name-disallowed-list": null
+      }
+    }
+  ],
+  "rules": {
+    "scale-unlimited/declaration-strict-value": [
+      [
+        "/color$/",
+        "font-size",
+        "font-weight",
+        "line-height",
+        "padding",
+        "padding-top",
+        "padding-right",
+        "padding-bottom",
+        "padding-left",
+        "margin",
+        "margin-top",
+        "margin-right",
+        "margin-bottom",
+        "margin-left",
+        "gap",
+        "border-radius",
+        "width",
+        "min-width",
+        "max-width",
+        "height",
+        "min-height",
+        "max-height",
+        "box-shadow",
+        "z-index",
+        "font-family",
+        "letter-spacing"
+      ],
+      {
+        "ignoreValues": [
+          "inherit",
+          "initial",
+          "transparent",
+          "currentColor",
+          "none",
+          "0",
+          "auto",
+          "/^-?\\d*\\.?\\d+%$/",
+          "/^\\d*\\.?\\d+(vh|vw|dvh|dvw|svh|svw|lvh|lvw)$/"
+        ],
+        "expandShorthand": true
+      }
+    ],
+    "custom-property-pattern": null,
+    "selector-class-pattern": null,
+    "media-feature-name-disallowed-list": [
+      [
+        "width",
+        "min-width",
+        "max-width"
+      ],
+      {
+        "message": "Use a named breakpoint from src/styles/breakpoints.css: @media (--tablet), (--mobile-landscape) or (--mobile-portrait)."
+      }
+    ],
+    "unit-disallowed-list": [
+      [
+        "px"
+      ],
+      {
+        "message": "Use rem, not px: divide the Figma px value by 16 (see CLAUDE.md \"The one hard rule\")."
+      }
+    ]
+  }
+}

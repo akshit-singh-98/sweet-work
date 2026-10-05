@@ -1,0 +1,27 @@
+/*
+  Breakpoints — the single source of truth for every media query in the
+  project (standard Webflow cutoffs). Use them by name:
+
+    @media (--tablet) { … }
+
+  CSS custom properties can't be read inside @media conditions, so these
+  are @custom-media definitions instead. postcss.config.mjs injects this
+  file into every stylesheet and component <style> block at build time
+  (@csstools/postcss-global-data), then postcss-custom-media replaces each
+  name with its query. Nothing imports this file directly, and nothing in
+  it reaches the browser.
+
+  Changing a breakpoint? Edit it here — every layout class, utility
+  variant, and responsive token follows. Then update the "Applies at"
+  table on /class-system (`breakpoints` in class-system.astro), which is
+  display text and can't read this file.
+
+  Not covered, deliberately: the style guide / class-system chrome
+  (style-guide.css) and the placeholder homepage (home.css / index.astro)
+  keep literal values — they're tools, independent of the project's
+  design system. See CLAUDE.md "Style guide chrome is independent".
+*/
+
+@custom-media --tablet screen and (width <= 61.9375rem);
+@custom-media --mobile-landscape screen and (width <= 47.9375rem);
+@custom-media --mobile-portrait screen and (width <= 29.9375rem);

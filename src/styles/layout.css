@@ -1,0 +1,289 @@
+/*
+  Layout layer — the structural classes every page is assembled from:
+  section → container → grid / flex. See CLAUDE.md "Class system" and the
+  live reference at /class-system.
+
+    <section class="section section-top-large">
+      <div class="container-large">
+        <div class="grid-3col gap-large"> … </div>
+      </div>
+    </section>
+
+  Rules of this file:
+  - Every class is complete on its own. `grid-3col` is a grid; there is no
+    separate `.grid` class to forget.
+  - Variants are set through private custom properties (--_section-top,
+    --_grid-cols, ...), so combining classes never depends on class order
+    in the HTML.
+  - Everything is responsive by default (see the grid table below); the
+    -tablet / -mobile-landscape / -mobile-portrait suffix is the one way to
+    override a class at a breakpoint.
+
+  Breakpoints come from src/styles/breakpoints.css, the single source of
+  truth: @media (--tablet) / (--mobile-landscape) / (--mobile-portrait).
+*/
+
+/* The private --_* properties the classes below set are registered as
+   non-inheriting. Custom properties inherit by default, so without this a
+   grid nested inside grid-2col-wide-left would pick up its parent's 2 : 1
+   template (or a -tablet override), and a section inside section-top-large
+   its parent's padding. '*' with no initial value keeps the var()
+   fallbacks working exactly as before. */
+@property --_section-top {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --_section-bottom {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --_grid-template {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --_grid-cols {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --_grid-cols-tablet {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --_grid-cols-ml {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --_grid-cols-mp {
+  syntax: '*';
+  inherits: false;
+}
+
+@layer layout {
+  /* ---- Section ----
+     The outer wrapper of every page section. Carries the vertical rhythm
+     (top/bottom padding from --section-space-*) and the horizontal page
+     gutter (--padding-global). Full-bleed backgrounds go on the section;
+     content goes in a container inside it. Defaults to medium top and
+     bottom; override either side independently. */
+  .section {
+    position: relative;
+    padding: var(--_section-top, var(--section-space-medium)) var(--padding-global) var(--_section-bottom, var(--section-space-medium)) var(--padding-global);
+  }
+
+  .section-top-none { --_section-top: 0; }
+  .section-top-small { --_section-top: var(--section-space-small); }
+  .section-top-medium { --_section-top: var(--section-space-medium); }
+  .section-top-large { --_section-top: var(--section-space-large); }
+  .section-top-xlarge { --_section-top: var(--section-space-xlarge); }
+  .section-bottom-none { --_section-bottom: 0; }
+  .section-bottom-small { --_section-bottom: var(--section-space-small); }
+  .section-bottom-medium { --_section-bottom: var(--section-space-medium); }
+  .section-bottom-large { --_section-bottom: var(--section-space-large); }
+  .section-bottom-xlarge { --_section-bottom: var(--section-space-xlarge); }
+
+  /* Drops the side gutter for edge-to-edge content (a full-width image,
+     a marquee). Anything inside that still needs the gutter gets
+     .padding-global. */
+  .section-full-bleed {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* The side gutter on its own, for wrappers that aren't a .section —
+     navbar, footer bar, announcement banner. */
+  .padding-global {
+    padding-left: var(--padding-global);
+    padding-right: var(--padding-global);
+  }
+
+  /* ---- Container ----
+     Caps content width and centers it. One per section, directly inside
+     it. Can share an element with a grid/flex class
+     (class="container-large grid-2col"). */
+  .container-small,
+  .container-medium,
+  .container-large,
+  .container-full {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .container-small { max-width: var(--container-small); }
+  .container-medium { max-width: var(--container-medium); }
+  .container-large { max-width: var(--container-large); }
+  .container-full { max-width: none; }
+
+  /* ---- Grid ----
+     Equal columns: grid-1col … grid-6col. Uneven: grid-2col-wide-left
+     (2 : 1) and grid-2col-wide-right (1 : 2). Card grids that wrap on
+     their own: grid-auto-small/medium/large. Gap comes from gap-* in
+     utilities.css (default 0).
+
+     Default responsive behavior — no extra classes needed:
+                         desktop  tablet  mobile-l  mobile-p
+       grid-2col            2        2        1         1
+       grid-3col            3        3        1         1
+       grid-4col            4        2        1         1
+       grid-5col / 6col   5 / 6      3        2         2
+       grid-2col-wide-*   2 : 1    2 : 1      1         1
+       grid-auto-*        fits as many columns as the min width allows
+
+     Override at a breakpoint with grid-{1-4}col-{tablet|mobile-landscape|
+     mobile-portrait}, e.g. class="grid-4col grid-2col-mobile-landscape".
+     An override holds at its width and every width below it, and beats
+     the default collapse there: grid-3col grid-2col-tablet stays 2
+     columns on mobile too. Add a narrower variant to change it again.
+
+     How: each breakpoint's override sets its own private property
+     (--_grid-cols-tablet, -ml, -mp), and the column count reads them
+     narrowest first, falling back to the default --_grid-cols. Source
+     order and class order never matter. An override also clears
+     --_grid-template, so it turns a wide-left/right or auto grid into
+     plain equal columns. */
+  .grid-1col,
+  .grid-2col,
+  .grid-3col,
+  .grid-4col,
+  .grid-5col,
+  .grid-6col,
+  .grid-2col-wide-left,
+  .grid-2col-wide-right,
+  .grid-auto-small,
+  .grid-auto-medium,
+  .grid-auto-large {
+    display: grid;
+    grid-template-columns: var(--_grid-template, repeat(var(--_grid-cols-mp, var(--_grid-cols-ml, var(--_grid-cols-tablet, var(--_grid-cols, 1)))), minmax(0, 1fr)));
+  }
+
+  .grid-1col { --_grid-cols: 1; }
+  .grid-2col { --_grid-cols: 2; }
+  .grid-3col { --_grid-cols: 3; }
+  .grid-4col { --_grid-cols: 4; }
+  .grid-5col { --_grid-cols: 5; }
+  .grid-6col { --_grid-cols: 6; }
+  .grid-2col-wide-left { --_grid-template: minmax(0, 2fr) minmax(0, 1fr); }
+  .grid-2col-wide-right { --_grid-template: minmax(0, 1fr) minmax(0, 2fr); }
+  .grid-auto-small { --_grid-template: repeat(auto-fit, minmax(min(var(--grid-min-small), 100%), 1fr)); }
+  .grid-auto-medium { --_grid-template: repeat(auto-fit, minmax(min(var(--grid-min-medium), 100%), 1fr)); }
+  .grid-auto-large { --_grid-template: repeat(auto-fit, minmax(min(var(--grid-min-large), 100%), 1fr)); }
+
+  /* Grid children */
+  .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
+  .col-span-full { grid-column: 1 / -1; }
+
+  /* ---- Flex ----
+     flex-horizontal = a row, flex-vertical = a column. Alignment and gap
+     come from utilities.css (align-items-*, justify-content-*, gap-*) and
+     work the same on grids. */
+  .flex-horizontal,
+  .flex-vertical {
+    display: flex;
+  }
+
+  .flex-horizontal { flex-direction: row; }
+  .flex-vertical { flex-direction: column; }
+  .flex-wrap { flex-wrap: wrap; }
+
+  /* Flex children */
+  .flex-grow {
+    flex: 1 1 0%;
+    min-width: 0;
+  }
+  .flex-none { flex: none; }
+
+  /* ---- Responsive: tablet ---- */
+  @media (--tablet) {
+    .grid-4col { --_grid-cols: 2; }
+
+    .grid-5col,
+    .grid-6col { --_grid-cols: 3; }
+
+    .grid-1col-tablet {
+      --_grid-template: initial;
+      --_grid-cols-tablet: 1;
+    }
+
+    .grid-2col-tablet {
+      --_grid-template: initial;
+      --_grid-cols-tablet: 2;
+    }
+
+    .grid-3col-tablet {
+      --_grid-template: initial;
+      --_grid-cols-tablet: 3;
+    }
+
+    .grid-4col-tablet {
+      --_grid-template: initial;
+      --_grid-cols-tablet: 4;
+    }
+    .flex-vertical-tablet { flex-direction: column; }
+    .flex-horizontal-tablet { flex-direction: row; }
+  }
+
+  /* ---- Responsive: mobile landscape ---- */
+  @media (--mobile-landscape) {
+    .grid-2col,
+    .grid-3col,
+    .grid-4col { --_grid-cols: 1; }
+
+    .grid-5col,
+    .grid-6col { --_grid-cols: 2; }
+
+    .grid-2col-wide-left,
+    .grid-2col-wide-right {
+      --_grid-template: initial;
+      --_grid-cols: 1;
+    }
+
+    /* A span wider than the (now single) column would create extra
+       implicit columns and overflow — reset spans at this width. */
+    .col-span-2,
+    .col-span-3 { grid-column: auto; }
+
+    .grid-1col-mobile-landscape {
+      --_grid-template: initial;
+      --_grid-cols-ml: 1;
+    }
+
+    .grid-2col-mobile-landscape {
+      --_grid-template: initial;
+      --_grid-cols-ml: 2;
+    }
+
+    .grid-3col-mobile-landscape {
+      --_grid-template: initial;
+      --_grid-cols-ml: 3;
+    }
+
+    .grid-4col-mobile-landscape {
+      --_grid-template: initial;
+      --_grid-cols-ml: 4;
+    }
+    .flex-vertical-mobile-landscape { flex-direction: column; }
+    .flex-horizontal-mobile-landscape { flex-direction: row; }
+  }
+
+  /* ---- Responsive: mobile portrait ---- */
+  @media (--mobile-portrait) {
+    .grid-1col-mobile-portrait {
+      --_grid-template: initial;
+      --_grid-cols-mp: 1;
+    }
+
+    .grid-2col-mobile-portrait {
+      --_grid-template: initial;
+      --_grid-cols-mp: 2;
+    }
+    .flex-vertical-mobile-portrait { flex-direction: column; }
+    .flex-horizontal-mobile-portrait { flex-direction: row; }
+  }
+}
